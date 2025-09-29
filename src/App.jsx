@@ -26,12 +26,13 @@ function App() {
   const restaurants = [
     { 
       id: 1, 
-      name: 'Sushi Garden', 
+      name: 'AMA Bistro', 
       emoji: '🍣', 
       description: 'Fresh rolls & cozy vibes',
       cuisine: 'Japanese',
       price: '$$',
-      time: '7:00 PM'
+      time: '7:00 PM',
+      link: ''
     },
     { 
       id: 2, 
@@ -339,14 +340,14 @@ function App() {
             </div>
           </div>
         );
-
-      case 2:
+      // Page 2 -> asking for date and time 
+      case 2: 
         return (
           <div className="space-y-6">
             <div className="text-center">
               <Calendar className="w-16 h-16 text-pink-400 mx-auto mb-4" />
               <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
-                Pick the perfect date
+                Pick the bubbperfect date
               </h2>
               <p className="text-gray-500 mt-2">When should we create this memory?</p>
             </div>
@@ -453,6 +454,9 @@ function App() {
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {restaurant.time}
+                        </span>
+                        <span className='flex items-center'>
+                          {restaurant.link}
                         </span>
                       </div>
                     </div>
