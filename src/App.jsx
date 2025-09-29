@@ -296,9 +296,11 @@ function App() {
                 </span>
                 <br />
                 <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 bg-clip-text text-transparent">
-                  a date?
+                  a bubbaversary date?
                 </span>
-                <span className="inline-block ml-3 animate-bounce">💖</span>
+                {/* <span className="inline-block ml-3 animate-pulse">
+                  <img src="https://media.tenor.com/I_rw0vcOXJYAAAAi/dudu-bubu-cute-kiss.gif" alt="bubu kissing dudu" className='w-10 h-10' />
+                </span> */}
               </h1>
             </div>
             
@@ -331,6 +333,10 @@ function App() {
                 (pretty please? 🥺)
               </div>
             )}
+            {/* bubu dudu gif at bottom */}
+            <div className='flex justify-center items-center'>
+              <img src="https://media.tenor.com/I_rw0vcOXJYAAAAi/dudu-bubu-cute-kiss.gif" alt="dudu kissing bubu" />
+            </div>
           </div>
         );
 
