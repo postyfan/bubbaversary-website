@@ -23,43 +23,27 @@ function App() {
   // ============================================
   // CUSTOMIZATION: Restaurant Options
   // ============================================
-  const restaurants = [
+  const wednesdayRestaurants = [
     { 
       id: 1, 
-      name: 'AMA Bistro', 
+      name: 'Bae', 
       emoji: '🍣', 
-      description: 'Fresh rolls & cozy vibes',
+      description: 'Japanese inspired cocktail lounge',
       cuisine: 'Japanese',
-      price: '$$',
-      time: '7:00 PM',
-      link: ''
+      seating: 'patio',
+      time: '8:00 PM',
     },
+  ];
+
+  const saturdayRestaurants = [
     { 
-      id: 2, 
-      name: 'Italian Bistro', 
-      emoji: '🍝', 
-      description: 'Romantic candlelit dinner',
-      cuisine: 'Italian',
-      price: '$$$',
-      time: '8:00 PM'
-    },
-    { 
-      id: 3, 
-      name: 'K-BBQ Night', 
-      emoji: '🥓', 
-      description: 'Interactive grilling fun',
-      cuisine: 'Korean',
-      price: '$$',
-      time: '6:30 PM'
-    },
-    { 
-      id: 4, 
-      name: 'Ramen Spot', 
-      emoji: '🍜', 
-      description: 'Comfort food & warmth',
+      id: 1, 
+      name: 'AMA Raw Bar', 
+      emoji: '🍣', 
+      description: 'Japanese inspired cocktail lounge',
       cuisine: 'Japanese',
-      price: '$',
-      time: '7:30 PM'
+      seating: 'bar',
+      time: '8:00 PM',
     },
   ];
 
@@ -84,49 +68,17 @@ function App() {
   const specialDates = [
     { 
       id: 1, 
-      name: 'October 9', 
+      name: 'Wednesday', 
       emoji: '🌟', 
-      getDate: () => {
-        const today = new Date();
-        const saturday = new Date();
-        saturday.setDate(today.getDate() + ((6 - today.getDay() + 7) % 7 || 7));
-        return saturday.toISOString().split('T')[0];
-      }
+      date: '2025-10-09',
+      type: 'wednesday'
     },
     { 
       id: 2, 
-      name: 'Our Anniversary', 
+      name: 'Saturday', 
       emoji: '💕', 
-      date: '2025-02-14' // Change to your anniversary date
-    },
-    { 
-      id: 3, 
-      name: 'Valentine\'s Day', 
-      emoji: '❤️', 
-      date: '2025-02-14'
-    },
-    { 
-      id: 4, 
-      name: 'Next Friday Night', 
-      emoji: '✨', 
-      getDate: () => {
-        const today = new Date();
-        const friday = new Date();
-        friday.setDate(today.getDate() + ((5 - today.getDay() + 7) % 7 || 7));
-        return friday.toISOString().split('T')[0];
-      }
-    },
-    {
-      id: 5,
-      name: 'Christmas Eve',
-      emoji: '🎄',
-      date: '2024-12-24'
-    },
-    {
-      id: 6,
-      name: 'New Year\'s Eve',
-      emoji: '🎊',
-      date: '2024-12-31'
+      date: '2025-10-12',
+      type: 'saturday'
     }
   ];
 
@@ -145,12 +97,6 @@ function App() {
         else if (parsed.date) setCurrentStep(3);
         else setCurrentStep(2);
       }
-    } else {
-      // Set default date to next Saturday
-      const today = new Date();
-      const nextSaturday = new Date();
-      nextSaturday.setDate(today.getDate() + ((6 - today.getDay() + 7) % 7 || 7));
-      setDateData(prev => ({ ...prev, date: nextSaturday.toISOString().split('T')[0] }));
     }
   }, []);
 
@@ -175,13 +121,41 @@ function App() {
   };
 
   const handleNext = () => {
-    if (currentStep < 6) {
-      setCurrentStep(currentStep + 1);
+    // Add this special logic for after date selection
+  if (currentStep === 2) {
+    // Check which date was selected
+    const selectedDate = specialDates.find(d => d.date === dateData.date);
+    
+    if (selectedDate?.name === 'Wednesday') {
+      setCurrentStep(3);  // Go to Wednesday restaurants
+    } else if (selectedDate?.name === 'Saturday') {
+      setCurrentStep(7);  // Go to Saturday restaurants  
+    } else {
+      setCurrentStep(3);  // Default fallback
     }
+  } 
+  else if (currentStep === 7) {
+    setCurrentStep(4);  // After Saturday restaurants, go to activities
+  }
+  else if (currentStep < 6) {
+    setCurrentStep(currentStep + 1);
+  }
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
+    if (currentStep === 7) {
+      setCurrentStep(2);  // From Saturday restaurants, go back to date selection
+    } 
+    else if (currentStep === 4) {
+      // Need to check which restaurant page they came from
+      const selectedDate = specialDates.find(d => d.date === dateData.date);
+      if (selectedDate?.name === 'Saturday') {
+        setCurrentStep(7);  // Go back to Saturday restaurants
+      } else {
+        setCurrentStep(3);  // Go back to Wednesday restaurants
+      }
+    }
+    else if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
@@ -258,6 +232,7 @@ function App() {
       case 2: return dateData.date !== '';
       case 3: return dateData.restaurant !== '';
       case 4: return dateData.activity !== '';
+      case 7: return dateData.restaurant !=='';
       default: return true;
     }
   };
@@ -278,6 +253,10 @@ function App() {
     return emojis[value - 1] || '💖';
   };
 
+  const getProgressStep = () => {
+    if (currentStep == 7) return 3;
+    return currentStep;
+  }
   // ============================================
   // RENDER STEP CONTENT
   // ============================================
@@ -345,8 +324,8 @@ function App() {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <Calendar className="w-16 h-16 text-pink-400 mx-auto mb-4" />
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+              <Calendar className="w-16 h-16 text-red-400 mx-auto mb-4" />
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">
                 Pick the bubbperfect date
               </h2>
               <p className="text-gray-500 mt-2">When should we create this memory?</p>
@@ -354,7 +333,7 @@ function App() {
             
             <div className="max-w-2xl mx-auto space-y-6">
               {/* Special Date Buttons */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
                 {specialDates.map((special) => {
                   const dateValue = special.getDate ? special.getDate() : special.date;
                   return (
@@ -363,8 +342,8 @@ function App() {
                       onClick={() => setDateData(prev => ({ ...prev, date: dateValue }))}
                       className={`p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105
                                 ${dateData.date === dateValue
-                                  ? 'border-pink-400 bg-gradient-to-r from-pink-50 to-rose-50 shadow-lg shadow-pink-200/50'
-                                  : 'border-gray-200 hover:border-pink-300 bg-white'}`}
+                                  ? 'border-red-400 bg-gradient-to-r from-red-50 to-rose-50 shadow-lg shadow-pink-200/50'
+                                  : 'border-gray-200 hover:border-red-300 bg-white'}`}
                     >
                       <div className="text-2xl mb-1">{special.emoji}</div>
                       <div className="text-sm font-semibold">{special.name}</div>
@@ -376,7 +355,7 @@ function App() {
                 })}
               </div>
 
-              {/* Custom Date Picker */}
+              {/* Custom Date Picker
               <div className="relative">
                 <div className="text-center text-sm text-gray-500 mb-2">Or choose your own date:</div>
                 <input
@@ -388,7 +367,7 @@ function App() {
                            focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100
                            transition-all duration-300 hover:border-pink-300"
                 />
-              </div>
+              </div> */}
               
               {/* Selected Date Display */}
               {dateData.date && (
@@ -407,23 +386,23 @@ function App() {
             </div>
           </div>
         );
-
+      // Wednesday
       case 3:
         return (
           <div className="space-y-6">
             <div className="text-center">
               <Utensils className="w-16 h-16 text-pink-400 mx-auto mb-4" />
               <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
-                Choose our feast
+                Wednesday Options
               </h2>
               <p className="text-gray-500 mt-2">Where should we satisfy our taste buds?</p>
             </div>
             
             <div className="grid gap-4 max-w-3xl mx-auto">
-              {restaurants.map((restaurant) => (
+              {wednesdayRestaurants.map((restaurant) => (
                 <button
                   key={restaurant.id}
-                  onClick={() => handleRestaurantSelect(restaurant)}
+                  onClick={() =>  handleRestaurantSelect(restaurant)}
                   className={`relative p-6 rounded-2xl border-2 transition-all duration-300 transform
                             hover:scale-[1.02] hover:shadow-xl group
                             ${dateData.restaurant === restaurant.name 
@@ -443,7 +422,7 @@ function App() {
                     <div className="flex-1 text-left">
                       <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                         {restaurant.name}
-                        <span className="text-sm font-normal text-gray-400">{restaurant.price}</span>
+                        <span className="text-sm font-normal text-gray-400">{restaurant.seating}</span>
                       </h3>
                       <p className="text-gray-600 mt-1">{restaurant.description}</p>
                       <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
@@ -637,6 +616,65 @@ function App() {
             </div>
           </div>
         );
+        // Saturday
+        case 7:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <Utensils className="w-16 h-16 text-pink-400 mx-auto mb-4" />
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                Saturday Options
+              </h2>
+              <p className="text-gray-500 mt-2">Where should we satisfy our taste buds?</p>
+            </div>
+            
+            <div className="grid gap-4 max-w-3xl mx-auto">
+              {saturdayRestaurants.map((restaurant) => (
+                <button
+                  key={restaurant.id}
+                  onClick={() => handleRestaurantSelect(restaurant)}
+                  className={`relative p-6 rounded-2xl border-2 transition-all duration-300 transform
+                            hover:scale-[1.02] hover:shadow-xl group
+                            ${dateData.restaurant === restaurant.name 
+                              ? 'border-pink-400 bg-gradient-to-r from-pink-50 to-rose-50 shadow-lg shadow-pink-200/50' 
+                              : 'border-gray-200 hover:border-pink-300 bg-white'}`}
+                >
+                  {dateData.restaurant === restaurant.name && (
+                    <div className="absolute -top-3 -right-3 bg-pink-500 text-white rounded-full p-2 animate-bounce">
+                      <Heart className="w-4 h-4" fill="white" />
+                    </div>
+                  )}
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
+                      {restaurant.emoji}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        {restaurant.name}
+                        <span className="text-sm font-normal text-gray-400">{restaurant.seating}</span>
+                      </h3>
+                      <p className="text-gray-600 mt-1">{restaurant.description}</p>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {restaurant.cuisine}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {restaurant.time}
+                        </span>
+                        <span className='flex items-center'>
+                          {restaurant.link}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );  
 
       default:
         return null;
@@ -664,21 +702,24 @@ function App() {
           <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-12">
             {/* Progress Bar */}
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                {[1, 2, 3, 4, 5, 6].map((step) => (
+            <div className="flex items-center justify-between mb-4">
+              {[1, 2, 3, 4, 5, 6].map((step) => {
+                const progressStep = getProgressStep(); // Use normalized step
+                return (
                   <div key={step} className="flex items-center">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300
-                                  ${step <= currentStep 
+                                  ${step <= progressStep 
                                     ? 'bg-gradient-to-r from-pink-400 to-rose-400 text-white shadow-lg shadow-pink-300/50' 
                                     : 'bg-gray-200 text-gray-400'}`}>
-                      {step < currentStep ? '✓' : step}
+                      {step < progressStep ? '✓' : step}
                     </div>
                     {step < 6 && (
                       <div className={`w-full h-1 mx-2 transition-all duration-500
-                                    ${step < currentStep ? 'bg-gradient-to-r from-pink-400 to-rose-400' : 'bg-gray-200'}`} />
+                                    ${step < progressStep ? 'bg-gradient-to-r from-pink-400 to-rose-400' : 'bg-gray-200'}`} />
                     )}
                   </div>
-                ))}
+                );
+              })}
               </div>
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Start</span>
@@ -694,9 +735,9 @@ function App() {
             <div className="min-h-[400px]">
               {renderStepContent()}
             </div>
-            
+    
             {/* Navigation */}
-            {currentStep > 1 && currentStep < 6 && (
+            {(currentStep > 1 && currentStep < 6) || currentStep == 7 ? (
               <div className="flex justify-between items-center mt-12">
                 <button
                   onClick={handleBack}
@@ -721,7 +762,8 @@ function App() {
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
-            )}
+            ) : null
+          }
           </div>
         </div>
       </div>
