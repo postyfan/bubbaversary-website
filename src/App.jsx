@@ -31,12 +31,12 @@ function App() {
   const restaurants = [
     { 
       id: 1, 
-      name: 'Bae', 
+      name: 'AMA Raw Bar', 
       emoji: '🍣', 
       description: 'Japanese inspired cocktail lounge',
       cuisine: 'Japanese',
-      seating: 'Patio',
-      time: '8:00 PM',
+      seating: 'Standard Seating',
+      time: '7:00 PM',
     },
     {
       id: 2, 
@@ -46,6 +46,15 @@ function App() {
       cuisine: 'Coffee & Cocktail',
       seating: 'Inside',
       time: 'Walk-in Only',
+    },
+    {
+      id: 3, 
+      name: 'Cafe La Tana', 
+      emoji: '🍝', 
+      description: 'Pasta Bar',
+      cuisine: 'Italian',
+      seating: 'Standard Seating',
+      time: '7:30 pm',
     }
   ];
 
@@ -53,14 +62,10 @@ function App() {
   // CUSTOMIZATION: Activity Options
   // ============================================
   const activities = [
-    { id: 1, name: 'Seawall Stroll', emoji: '🌊', category: 'Romantic' },
-    { id: 2, name: 'Arcade Games', emoji: '🎮', category: 'Fun' },
-    { id: 3, name: 'Dessert Café', emoji: '🍰', category: 'Sweet' },
-    { id: 4, name: 'Movie Night', emoji: '🎬', category: 'Relaxed' },
-    { id: 5, name: 'Mini Golf', emoji: '⛳', category: 'Playful' },
-    { id: 6, name: 'Karaoke', emoji: '🎤', category: 'Energetic' },
-    { id: 7, name: 'Art Gallery', emoji: '🎨', category: 'Cultural' },
-    { id: 8, name: 'Star Gazing', emoji: '⭐', category: 'Romantic' },
+    { id: 1, name: 'Photo Booth', emoji: '📸', category: 'Romantic' },
+    { id: 2, name: 'Rec Room', emoji: '🎮', category: 'Fun' },
+    { id: 3, name: 'Italian Charm Bracelets', emoji: '💍', category: 'Sweet' },
+    { id: 4, name: 'Stroll around Downtown', emoji: '🌆', category: 'Relaxed' },
   ];
 
   // ============================================
