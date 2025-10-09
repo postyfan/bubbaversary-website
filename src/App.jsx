@@ -206,27 +206,27 @@ function App() {
       const templateParams = {
         to_name: 'Beautiful Girl',
         from_name: 'Bubba',
+        user_name: 'Beautiful Girl',
+        user_email: import.meta.env.VITE_YOUR_EMAIL,
         date: formatDate(dateData.date),
         restaurant: dateData.restaurant,
         activity: dateData.activity,
-        excitement: `${dateData.excitement}/10 ${getExcitementEmoji(dateData.excitement)}`,
-        weather: 'Weather data unavailable',
-        to_email: import.meta.env.VITE_YOUR_EMAIL || 'antonflorendo7@gmail.com',
-        message: `
-🎉 Our Bubbaversary Date Plan is Ready! 🎉
+        excitement_level: `${dateData.excitement}/6 ${getExcitementEmoji(dateData.excitement)}`,
+        weather_info: 'Perfect weather for our date! ☀️',
+        message: `🎉 Our Bubbaversary Date Plan is Ready! 🎉
 
 📅 Date: ${formatDate(dateData.date)}
-🍽️ Restaurant: ${dateData.restaurant}
+🍽️ Restaurant: ${dateData.restaurant}  
 🎉 Activity: ${dateData.activity}
-✨ Excitement Level: ${dateData.excitement}/10 ${getExcitementEmoji(dateData.excitement)}
+✨ Excitement Level: ${dateData.excitement}/6 ${getExcitementEmoji(dateData.excitement)}
 
-🌦️ Weather Forecast: Weather data unavailable
+🌦️ Weather Forecast: Perfect weather for our date! ☀️
 
 Can't wait for our amazing bubbaversary date! 💕
 
 With love,
-Bubba 🐱
-        `
+Bubba 🐱`,
+        reply_to: import.meta.env.VITE_YOUR_EMAIL
       };
 
       console.log('Sending email with params:', templateParams);
