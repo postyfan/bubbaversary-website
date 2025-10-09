@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Calendar, Utensils, Sparkles, Mail, ChevronLeft, ChevronRight, MapPin, Clock, Cloud } from 'lucide-react';
+import { Heart, Calendar, Utensils, Sparkles, Mail, ChevronLeft, ChevronRight, MapPin, Clock } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 
 // ============================================
@@ -16,15 +16,12 @@ function App() {
     dateConfirmed: false,  // New state for date confirmation
     restaurant: '',
     activity: '',
-    excitement: 5,
+    excitement: 1,
   });
   const [showSadMessage, setShowSadMessage] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showSuccessGif, setShowSuccessGif] = useState(false);  // Changed from showConfetti
   const [showDateEmoji, setShowDateEmoji] = useState(false);  // New state for date emoji animation
-  const [weather, setWeather] = useState(null);
-  const [weatherLoading, setWeatherLoading] = useState(false);
-  const [weatherError, setWeatherError] = useState(null);
   const [emailSending, setEmailSending] = useState(false);
   const [emailError, setEmailError] = useState(null);
 
@@ -42,23 +39,30 @@ function App() {
     {
       id: 2, 
       name: 'Ellipsis', 
-      gif: 'https://media.tenor.com/HugZQz8YCrAAAAAj/coffee-kawaii.gif',
+      gif: 'https://media.tenor.com/Ziu7zdOP70kAAAAm/mochi-peach.webp',
       cuisine: 'Coffee & Cocktail',
       time: 'Walk-in Only',
     },
     {
       id: 3, 
       name: 'Cafe La Tana', 
-      gif: 'https://media.tenor.com/l6VKmPSC2lQAAAAj/pasta-kawaii.gif',
+      gif: 'https://media.tenor.com/tCXH_96HjS8AAAAm/mochi-cat-noodles.webp',
       cuisine: 'Italian',
       time: '7:30 pm',
     },
     {
       id: 4, 
       name: 'Nuba Gastown', 
-      gif: 'https://media.tenor.com/PnlZyxtLuJgAAAAj/candle-kawaii.gif',
+      gif: 'https://media.tenor.com/JcPATwwdUOQAAAAm/bubu-dudu-sseeyall.webp',
       cuisine: 'Lebanese',
       time: '7:15 pm',
+    },
+    {
+      id: 5, 
+      name: 'Robba da Matti', 
+      gif: 'https://media.tenor.com/t_jJjJ5VXkkAAAAm/bubu-dudu-sseeyall.webp',
+      cuisine: 'Italian',
+      time: '7:00 pm',
     }
   ];
 
@@ -66,206 +70,12 @@ function App() {
   // CUSTOMIZATION: Activity Options
   // ============================================
   const activities = [
-    { id: 1, name: 'Photo Booth', gif: 'https://media.tenor.com/g9VCqF9FDAYAAAAJ/camera-kawaii.gif', category: 'Romantic' },
-    { id: 2, name: 'Rec Room', gif: 'https://media.tenor.com/YbkSdj3fzHwAAAAj/gaming-kawaii.gif', category: 'Fun' },
-    { id: 3, name: 'Italian Charm Bracelets', gif: 'https://media.tenor.com/tKDxLBnTi8cAAAAj/jewelry-kawaii.gif', category: 'Sweet' },
-    { id: 4, name: 'Stroll around Downtown', gif: 'https://media.tenor.com/4l6VbzC5hcgAAAAj/walking-kawaii.gif', category: 'Relaxed' },
-    { id: 5, name: 'Bubb Shopping?', gif: 'https://media.tenor.com/WBLBKZGlM4MAAAAj/shopping-kawaii.gif', category: 'Bubb' },
+    { id: 1, name: 'Photo Booth', gif: 'https://media.tenor.com/WjAptvAi6Y0AAAAm/sseeyall-bubu-dudu.webpf', category: 'Romantic' },
+    { id: 2, name: 'Rec Room', gif: 'https://media.tenor.com/imDjR7ZY5lMAAAAm/bubududu-panda.webp', category: 'Fun' },
+    { id: 3, name: 'Italian Charm Bracelets', gif: 'https://media.tenor.com/aygfai-mtoYAAAAm/tkthao219-bubududu.webp', category: 'Sweet' },
+    { id: 4, name: 'Stroll around Downtown', gif: 'https://media.tenor.com/pUQGNMgYn1cAAAAm/tkthao219-bubududu.webp', category: 'Relaxed' },
+    { id: 5, name: 'Bubb Shopping?', gif: 'https://media.tenor.com/QLaZrLbilKYAAAAm/tonibear-bear.webp', category: 'Bubb' },
   ];
-
-  // ============================================
-  // WEATHER API
-  // ============================================
-  const fetchWeather = async () => {
-    setWeatherLoading(true);
-    setWeatherError(null);
-    
-    try {
-      // Use environment variable for API key (more secure)
-      const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || 'bd5e378503939ddaee76f12ad7a97608';
-      const location = 'Vancouver,BC,Canada';
-      const targetDate = '2025-10-12'; // October 12, 2025
-      
-      console.log('Fetching weather for:', location, 'on', targetDate);
-      
-      // Get current weather first
-      const currentResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${API_KEY}`);
-      
-      if (!currentResponse.ok) {
-        const errorData = await currentResponse.json().catch(() => ({}));
-        throw new Error(`Weather API Error: ${currentResponse.status} - ${errorData.message || 'Unknown error'}`);
-      }
-      
-      const currentData = await currentResponse.json();
-      console.log('Current weather data received:', currentData);
-      
-      // Get 5-day forecast (includes October 12th since it's only 4 days away)
-      const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${location}&units=metric&appid=${API_KEY}`);
-      
-      if (!forecastResponse.ok) {
-        const errorData = await forecastResponse.json().catch(() => ({}));
-        throw new Error(`Forecast API Error: ${forecastResponse.status} - ${errorData.message || 'Unknown error'}`);
-      }
-      
-      const forecastData = await forecastResponse.json();
-      console.log('Forecast data received:', forecastData);
-      
-      // Find the forecast for October 12, 2025
-      const targetDateObj = new Date(targetDate);
-      const targetDateString = targetDateObj.toISOString().split('T')[0]; // '2025-10-12'
-      
-      // Filter forecast entries for October 12th
-      const oct12Forecasts = forecastData.list.filter(item => {
-        const itemDate = new Date(item.dt * 1000).toISOString().split('T')[0];
-        return itemDate === targetDateString;
-      });
-      
-      console.log(`Found ${oct12Forecasts.length} forecast entries for October 12th:`, oct12Forecasts);
-      
-      let oct12Weather;
-      if (oct12Forecasts.length > 0) {
-        // Calculate daily averages from the hourly forecasts for Oct 12
-        const temps = oct12Forecasts.map(f => f.main.temp);
-        const maxTemps = oct12Forecasts.map(f => f.main.temp_max);
-        const minTemps = oct12Forecasts.map(f => f.main.temp_min);
-        const rainProbs = oct12Forecasts.map(f => f.pop || 0);
-        
-        // Use the most common weather condition
-        const conditions = oct12Forecasts.map(f => f.weather[0]);
-        const mainCondition = conditions[Math.floor(conditions.length / 2)]; // Use midday condition
-        
-        oct12Weather = {
-          avgtemp_c: Math.round(temps.reduce((a, b) => a + b, 0) / temps.length),
-          maxtemp_c: Math.round(Math.max(...maxTemps)),
-          mintemp_c: Math.round(Math.min(...minTemps)),
-          daily_chance_of_rain: Math.round(Math.max(...rainProbs) * 100),
-          condition: {
-            text: mainCondition.description,
-            icon: `https://openweathermap.org/img/wn/${mainCondition.icon}@2x.png`,
-            code: mainCondition.id
-          },
-        };
-        
-        console.log('Calculated October 12th weather:', oct12Weather);
-      } else {
-        // Fallback to a forecast entry closest to October 12th
-        const today = new Date();
-        const daysDiff = Math.ceil((targetDateObj - today) / (1000 * 60 * 60 * 24));
-        const forecastIndex = Math.min(Math.max(0, daysDiff * 8), forecastData.list.length - 1);
-        const closestForecast = forecastData.list[forecastIndex];
-        
-        console.log(`Using closest forecast (index ${forecastIndex}):`, closestForecast);
-        
-        oct12Weather = {
-          avgtemp_c: Math.round(closestForecast.main.temp),
-          maxtemp_c: Math.round(closestForecast.main.temp_max),
-          mintemp_c: Math.round(closestForecast.main.temp_min),
-          daily_chance_of_rain: Math.round((closestForecast.pop || 0) * 100),
-          condition: {
-            text: closestForecast.weather[0].description,
-            icon: `https://openweathermap.org/img/wn/${closestForecast.weather[0].icon}@2x.png`,
-            code: closestForecast.weather[0].id
-          },
-        };
-      }
-      
-      // Format the final weather data structure
-      const weatherData = {
-        location: {
-          name: currentData.name,
-          country: currentData.sys.country,
-        },
-        current: {
-          temp_c: currentData.main.temp,
-          condition: {
-            text: currentData.weather[0].main,
-            icon: `https://openweathermap.org/img/wn/${currentData.weather[0].icon}@2x.png`,
-            code: currentData.weather[0].id
-          },
-          wind_kph: currentData.wind.speed * 3.6, // Convert m/s to km/h
-          humidity: currentData.main.humidity,
-        },
-        forecast: {
-          forecastday: [{
-            date: targetDate,
-            day: oct12Weather
-          }]
-        }
-      };
-      
-      setWeather(weatherData);
-      console.log('Weather successfully set for October 12th:', weatherData);
-      
-    } catch (error) {
-      console.error('Weather API Error Details:', {
-        message: error.message,
-        stack: error.stack,
-        targetDate: '2025-10-12'
-      });
-      
-      // Set specific error message based on error type
-      let errorMessage = 'Could not load weather data for October 12th. ';
-      if (error.message.includes('401')) {
-        errorMessage += 'Invalid API key.';
-      } else if (error.message.includes('404')) {
-        errorMessage += 'Location not found.';
-      } else if (error.message.includes('429')) {
-        errorMessage += 'Too many requests. Please try again later.';
-      } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        errorMessage += 'Network connection issue.';
-      } else {
-        errorMessage += error.message || 'Unknown error occurred.';
-      }
-      
-      setWeatherError(`${errorMessage} Using typical October weather for Vancouver instead.`);
-      
-      // Enhanced fallback data specifically for October 12th, 2025 in Vancouver
-      const fallbackData = {
-        location: {
-          name: "Vancouver",
-          region: "British Columbia", 
-          country: "Canada",
-        },
-        current: {
-          temp_c: 13, // Current temperature
-          condition: {
-            text: "Overcast",
-            icon: "https://openweathermap.org/img/wn/04d@2x.png",
-            code: 804
-          },
-          wind_kph: 12,
-          humidity: 78,
-        },
-        forecast: {
-          forecastday: [{
-            date: '2025-10-12',
-            day: {
-              avgtemp_c: 15,
-              maxtemp_c: 18,
-              mintemp_c: 12,
-              daily_chance_of_rain: 35,
-              condition: {
-                text: "Partly cloudy with sunny intervals",
-                icon: "https://openweathermap.org/img/wn/02d@2x.png",
-                code: 801
-              },
-            }
-          }]
-        }
-      };
-      
-      setWeather(fallbackData);
-    } finally {
-      setWeatherLoading(false);
-    }
-  };
-
-  // Fetch weather when reaching the final confirmation step
-  useEffect(() => {
-    if (currentStep === 6 && !weather) {
-      fetchWeather();
-    }
-  }, [currentStep, weather]);
 
   // ============================================
   // LIFECYCLE HOOKS
@@ -385,9 +195,7 @@ function App() {
         restaurant: dateData.restaurant,
         activity: dateData.activity,
         excitement: `${dateData.excitement}/10 ${getExcitementEmoji(dateData.excitement)}`,
-        weather: weather ? 
-          `${weather.forecast.forecastday[0].day.condition.text}, High: ${Math.round(weather.forecast.forecastday[0].day.maxtemp_c)}°C, Low: ${Math.round(weather.forecast.forecastday[0].day.mintemp_c)}°C, Rain: ${weather.forecast.forecastday[0].day.daily_chance_of_rain}%` :
-          'Weather data unavailable',
+        weather: 'Weather data unavailable',
         to_email: import.meta.env.VITE_YOUR_EMAIL || 'antonflorendo7@gmail.com',
         message: `
 🎉 Our Bubbaversary Date Plan is Ready! 🎉
@@ -397,9 +205,7 @@ function App() {
 🎉 Activity: ${dateData.activity}
 ✨ Excitement Level: ${dateData.excitement}/10 ${getExcitementEmoji(dateData.excitement)}
 
-🌦️ Weather Forecast: ${weather ? 
-  `${weather.forecast.forecastday[0].day.condition.text}, High: ${Math.round(weather.forecast.forecastday[0].day.maxtemp_c)}°C, Low: ${Math.round(weather.forecast.forecastday[0].day.mintemp_c)}°C, Rain: ${weather.forecast.forecastday[0].day.daily_chance_of_rain}%` :
-  'Weather data unavailable'}
+🌦️ Weather Forecast: Weather data unavailable
 
 Can't wait for our amazing bubbaversary date! 💕
 
@@ -423,7 +229,7 @@ Bubba 🐱
       setTimeout(() => {
         setShowSuccessGif(false);
         localStorage.removeItem('datePlanState');
-      }, 3000);
+      }, 8000); // Increased from 3000 to 8000 (8 seconds)
       
     } catch (error) {
       console.error('Failed to send email:', error);
@@ -487,12 +293,12 @@ Bubba 🐱
 
   const getExcitementGif = (value) => {
     const gifs = [
-      { gif: 'https://media.tenor.com/9z8aTaVmPfwAAAAm/cats-sad.webp', text: 'Not excited' },           // 1 = B
-      { gif: 'https://media.tenor.com/M1dGKzBzKQAAAAAj/bubu-dudu-disappointed.gif', text: 'Meh' },           // 2 = BU
-      { gif: 'https://media.tenor.com/6vQbOVXvlzwAAAAj/bubu-dudu-thinking.gif', text: 'Neutral' },         // 3 = BUB
-      { gif: 'https://media.tenor.com/YbkSdj3fzHwAAAAj/bubu-dudu-okay.gif', text: 'Okay' },               // 4 = BUBB
-      { gif: 'https://media.tenor.com/83zFQf-hwLMAAAAi/tkthao219-bubududu.gif', text: 'Good' },           // 5 = BUBBA
-      { gif: 'https://media.tenor.com/HugZQz8YCrAAAAAj/coffee-kawaii.gif', text: 'MAXIMUM EXCITEMENT!' } // 6 = BUBBAS
+      { gif: 'https://media.tenor.com/Y3j6d3RoSEoAAAA1/sad-cat-content-aware-scale.webp', text: 'Not excited' },           // 1 = B
+      { gif: 'https://media.tenor.com/t9PLz06a24wAAAAM/sad-cat.gif', text: 'Meh' },           // 2 = BU
+      { gif: 'https://media.tenor.com/URQcWYKN3ZoAAAAm/cat.webp', text: 'Neutral' },         // 3 = BUB
+      { gif: 'https://media.tenor.com/owsPz6f26FcAAAAM/happy-cat-silly-cat.gif', text: 'Okay' },               // 4 = BUBB
+      { gif: 'https://media.tenor.com/9Nr32cJWZ8oAAAAM/catto.gif', text: 'Good' },           // 5 = BUBBA
+      { gif: 'https://media.tenor.com/CnP64S7lszwAAAAm/meme-cat-cat-meme.webp', text: 'MAXIMUM EXCITEMENT!' } // 6 = BUBBAS
     ];
     return gifs[value - 1] || gifs[5];
   };
@@ -580,7 +386,6 @@ Bubba 🐱
             <div className='flex justify-center items-center mt-8'>
               <div className="relative">
                 <img src="https://media.tenor.com/I_rw0vcOXJYAAAAi/dudu kissing bubu" alt="dudu kissing bubu" className="rounded-3xl border-4 border-pink-200 shadow-xl"/>
-                <div className="absolute -top-2 -right-2 text-2xl animate-spin" style={{animationDuration: '3s'}}>✨</div>
               </div>
             </div>
           </div>
@@ -592,10 +397,9 @@ Bubba 🐱
             {/* Cute calendar icon */}
             <div className="flex justify-center mb-8">
               <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-pink-300 rounded-2xl border-4 border-purple-400 shadow-xl animate-float">
+                <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-pink-300 rounded-2xl border-4 border-purple-400 shadow-xl animate-none">
                   <Calendar className="w-12 h-12 text-white mx-auto mt-6" />
                 </div>
-                <div className="absolute -top-2 -right-2 text-2xl">📅</div>
               </div>
             </div>
 
@@ -622,7 +426,7 @@ Bubba 🐱
                          hover:shadow-red-400/50 hover:shadow-2xl active:scale-95 border-4 border-white"
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
-                  Perfect! 💕 <Heart className="w-6 h-6 animate-pulse" fill="white" />
+                  BUBB Perfect <Heart className="w-6 h-6 animate-pulse" fill="white" />
                 </span>
               </button>
               
@@ -632,7 +436,7 @@ Bubba 🐱
                          shadow-lg transform transition-all duration-300 hover:scale-105 hover:bg-gradient-to-r 
                          hover:from-red-200 hover:to-pink-200 hover:shadow-xl active:scale-95 border-4 border-red-200"
               >
-                Pick Another 😔
+                BUBB NO 😔
               </button>
             </div>
 
@@ -657,7 +461,6 @@ Bubba 🐱
               <div className='flex justify-center items-center mb-6'>
                 <div className="relative">
                   <img src="https://media.tenor.com/DBImicQnTG0AAAAj/bubu-dudu-eat.gif" alt="" className="rounded-3xl border-4 border-pink-200 shadow-xl"/>
-                  <div className="absolute -top-2 -right-2 text-2xl animate-bounce">🍽️</div>
                 </div>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -671,39 +474,39 @@ Bubba 🐱
               </div>
             </div>
             
-            <div className="grid gap-6 max-w-3xl mx-auto">
+            <div className="grid gap-4 sm:gap-6 max-w-3xl mx-auto">
               {restaurants.map((restaurant) => (
                 <button
                   key={restaurant.id}
                   onClick={() => handleRestaurantSelect(restaurant)}
-                  className={`relative p-8 rounded-3xl border-4 transition-all duration-300 transform
+                  className={`relative p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border-4 transition-all duration-300 transform
                             hover:scale-[1.02] hover:shadow-2xl group bg-gradient-to-br from-white to-red-50
                             ${dateData.restaurant === restaurant.name 
                               ? 'border-red-400 bg-gradient-to-br from-red-100 to-pink-100 shadow-xl shadow-red-300/50' 
                               : 'border-red-200 hover:border-red-300'}`}
                 >
                   {dateData.restaurant === restaurant.name && (
-                    <div className="absolute -top-4 -right-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full p-3 animate-bounce border-4 border-white shadow-lg">
-                      <Heart className="w-5 h-5" fill="white" />
+                    <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full p-2 sm:p-3 animate-bounce-slow border-2 sm:border-4 border-white shadow-lg">
+                      <Heart className="w-4 h-4 sm:w-5 sm:h-5" fill="white" />
                     </div>
                   )}
                   
-                  <div className="flex items-start gap-6">
-                    <div className="w-16 h-16">
-                      <img src={restaurant.gif} alt={restaurant.name} className="rounded-full shadow-lg" />
+                  <div className="flex items-start gap-3 sm:gap-4 md:gap-6">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex-shrink-0">
+                      <img src={restaurant.gif} alt={restaurant.name} className="rounded-full shadow-lg w-full h-full object-cover" />
                     </div>
-                    <div className="flex-1 text-left">
-                      <h3 className="text-2xl font-bold text-purple-800 flex items-center gap-3 mb-2">
+                    <div className="flex-1 text-left min-w-0">
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-800 flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
                         {restaurant.name}
                       </h3>
-                      <div className="flex items-center gap-6 text-purple-500">
-                        <span className="flex items-center gap-2 bg-pink-100 px-3 py-1 rounded-full border-2 border-pink-200">
-                          <MapPin className="w-4 h-4" />
-                          {restaurant.cuisine}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 md:gap-6 text-purple-500">
+                        <span className="flex items-center gap-1 sm:gap-2 bg-pink-100 px-2 sm:px-3 py-1 rounded-full border-2 border-pink-200 text-xs sm:text-sm">
+                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <span className="truncate">{restaurant.cuisine}</span>
                         </span>
-                        <span className="flex items-center gap-2 bg-purple-100 px-3 py-1 rounded-full border-2 border-purple-200">
-                          <Clock className="w-4 h-4" />
-                          {restaurant.time}
+                        <span className="flex items-center gap-1 sm:gap-2 bg-purple-100 px-2 sm:px-3 py-1 rounded-full border-2 border-purple-200 text-xs sm:text-sm">
+                          <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <span className="truncate">{restaurant.time}</span>
                         </span>
                       </div>
                     </div>
@@ -719,7 +522,7 @@ Bubba 🐱
           <div className="space-y-8">
             <div className="text-center">
               <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-pink-300 rounded-2xl border-4 border-purple-400 shadow-xl animate-float">
+                <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-red-300 rounded-2xl border-4 border-purple-400 shadow-xl animate-none">
                   <Sparkles className="w-12 h-12 text-white mx-auto mt-6" />
                 </div>
               </div>
@@ -815,8 +618,9 @@ Bubba 🐱
                   }}
                 />
                 <div className="flex justify-between mt-6 text-purple-600 font-semibold">
-                  <span className="bg-purple-100 px-3 py-1 rounded-full border-2 border-purple-200">B 😐</span>
-                  <span className="bg-pink-100 px-3 py-1 rounded-full border-2 border-pink-200">BUBBAS! 🎉</span>
+                  <span className="bg-purple-100 px-1 py-1 rounded-full border-2 border-purple-200"><img src="https://media.tenor.com/Y3j6d3RoSEoAAAA1/sad-cat-content-aware-scale.webp" alt="" className='rounded-full w-12 h-12'/></span>
+                  
+                  <span className="bg-purple-100 px-1 py-1 rounded-full border-2 border-purple-200"><img src="https://media.tenor.com/CnP64S7lszwAAAAm/meme-cat-cat-meme.webpp" alt="" className='rounded-full w-12 h-12'/></span>
                 </div>
               </div>
             </div>
@@ -828,7 +632,7 @@ Bubba 🐱
           <div className="space-y-8">
             <div className="text-center">
               <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-pink-300 rounded-2xl border-4 border-purple-400 shadow-xl animate-float">
+                <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-pink-300 rounded-2xl border-4 border-purple-400 shadow-xl">
                   <Mail className="w-12 h-12 text-white mx-auto mt-6" />
                 </div>
               </div>
@@ -837,7 +641,7 @@ Bubba 🐱
                   Perfect! Let's confirm
                 </span>
               </h2>
-              <p className="text-purple-600 text-xl">Review our amazing date plan 💕</p>
+              <p className="text-purple-600 text-xl">Review our bubbtastic date plan 💕</p>
             </div>
             
             <div className="max-w-lg mx-auto">
@@ -851,7 +655,7 @@ Bubba 🐱
                 <div className="space-y-5">
                   <div className="bg-white rounded-2xl p-6 shadow-lg border-3 border-pink-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
                     <div className="flex items-center gap-4">
-                      <div className="text-4xl animate-bounce">📅</div>
+                      <div className="text-4xl">📅</div>
                       <div className="flex-1">
                         <div className="text-xs text-purple-500 uppercase tracking-wide font-bold">Date</div>
                         <div className="font-bold text-purple-800 text-lg">{formatDate(dateData.date)}</div>
@@ -859,61 +663,9 @@ Bubba 🐱
                     </div>
                   </div>
                   
-                  {/* Weather Information */}
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border-3 border-pink-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
-                    <div className="flex items-start gap-4">
-                      <div className="text-4xl animate-float">🌦️</div>
-                      <div className="flex-1">
-                        <div className="text-xs text-purple-500 uppercase tracking-wide font-bold">Weather</div>
-                        {weatherLoading ? (
-                          <div className="flex items-center gap-2 font-bold text-purple-800">
-                            <div className="h-4 w-4 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
-                            Loading weather forecast...
-                          </div>
-                        ) : weather ? (
-                          <div>
-                            <div className="font-bold text-purple-800 flex items-center gap-2 text-lg mb-3">
-                              {weather.forecast.forecastday[0].day.condition.text}
-                              <img 
-                                src={weather.forecast.forecastday[0].day.condition.icon}
-                                alt="Weather icon" 
-                                className="w-8 h-8 animate-float"
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                              <div className="bg-pink-50 rounded-lg p-2 border-2 border-pink-100">
-                                <span className="text-purple-500">High: </span>
-                                <span className="text-purple-800 font-bold">{Math.round(weather.forecast.forecastday[0].day.maxtemp_c)}°C</span>
-                              </div>
-                              <div className="bg-purple-50 rounded-lg p-2 border-2 border-purple-100">
-                                <span className="text-purple-500">Low: </span>
-                                <span className="text-purple-800 font-bold">{Math.round(weather.forecast.forecastday[0].day.mintemp_c)}°C</span>
-                              </div>
-                              <div className="bg-pink-50 rounded-lg p-2 border-2 border-pink-100">
-                                <span className="text-purple-500">Rain: </span>
-                                <span className="text-purple-800 font-bold">{weather.forecast.forecastday[0].day.daily_chance_of_rain}%</span>
-                              </div>
-                              <div className="bg-purple-50 rounded-lg p-2 border-2 border-purple-100">
-                                <span className="text-purple-500">Humidity: </span>
-                                <span className="text-purple-800 font-bold">{weather.current.humidity}%</span>
-                              </div>
-                            </div>
-                            {weatherError && (
-                              <div className="text-xs text-pink-600 mt-2 bg-pink-50 p-2 rounded border-2 border-pink-100">
-                                {weatherError}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="font-bold text-purple-800">Weather unavailable</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
                   <div className="bg-white rounded-2xl p-6 shadow-lg border-3 border-pink-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
                     <div className="flex items-center gap-4">
-                      <div className="text-4xl animate-float">🍽️</div>
+                      <div className="text-4xl animate-none">🍽️</div>
                       <div className="flex-1">
                         <div className="text-xs text-purple-500 uppercase tracking-wide font-bold">Restaurant</div>
                         <div className="font-bold text-purple-800 text-lg">{dateData.restaurant}</div>
@@ -923,7 +675,7 @@ Bubba 🐱
                   
                   <div className="bg-white rounded-2xl p-6 shadow-lg border-3 border-pink-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
                     <div className="flex items-center gap-4">
-                      <div className="text-4xl animate-bounce">🎉</div>
+                      <div className="text-4xl animate-none">🎉</div>
                       <div className="flex-1">
                         <div className="text-xs text-purple-500 uppercase tracking-wide font-bold">Activity</div>
                         <div className="font-bold text-purple-800 text-lg">{dateData.activity}</div>
@@ -937,7 +689,7 @@ Bubba 🐱
                       <div className="flex-1">
                         <div className="text-xs text-purple-500 uppercase tracking-wide font-bold">Excitement Level</div>
                         <div className="font-bold text-purple-800 text-lg flex items-center gap-2">
-                          {dateData.excitement}/10 {getExcitementEmoji(dateData.excitement)}
+                          {dateData.excitement}/6 {getExcitementEmoji(dateData.excitement)}
                         </div>
                       </div>
                     </div>
@@ -1060,17 +812,11 @@ const SuccessGifAnimation = () => {
   return (
     <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
       <div className="animate-bounce-in-scale">
-        <div className="relative">
-          <img 
-            src="https://media.tenor.com/n6YQ_qcvFMUAAAAj/bubu-dudu-love.gi" 
-            alt="Success celebration" 
-            className="w-80 h-80 rounded-3xl border-8 border-pink-300 shadow-2xl bg-white p-4"
-          />
-          {/* <div className="absolute -top-4 -left-4 text-4xl animate-spin" style={{animationDuration: '2s'}}>💕</div>
-          <div className="absolute -top-4 -right-4 text-4xl animate-pulse">✨</div>
-          <div className="absolute -bottom-4 -left-4 text-4xl animate-bounce">🎉</div>
-          <div className="absolute -bottom-4 -right-4 text-4xl animate-pulse">💖</div> */}
-        </div>
+        <img 
+          src="https://media.tenor.com/XOtYEOucXZgAAAAi/dudu-happy-dancing.gif" 
+          alt="Success celebration" 
+          className="w-[500px] h-[500px] md:w-[700px] md:h-[700px] lg:w-[800px] lg:h-[800px] xl:w-[900px] xl:h-[900px] rounded-3xl"
+        />
       </div>
     </div>
   );
