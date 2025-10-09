@@ -171,9 +171,24 @@ function App() {
       const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
       
+      // Debug logging for production
+      console.log('Environment check:', {
+        hasServiceId: !!serviceId,
+        hasTemplateId: !!templateId,
+        hasPublicKey: !!publicKey,
+        nodeEnv: import.meta.env.MODE,
+        isDev: import.meta.env.DEV,
+        isProd: import.meta.env.PROD
+      });
+      
       // Check if all required EmailJS credentials are present
       if (!serviceId || !templateId || !publicKey) {
-        throw new Error('Missing EmailJS credentials. Please check your .env.local file.');
+        const missingVars = [];
+        if (!serviceId) missingVars.push('VITE_EMAILJS_SERVICE_ID');
+        if (!templateId) missingVars.push('VITE_EMAILJS_TEMPLATE_ID');
+        if (!publicKey) missingVars.push('VITE_EMAILJS_PUBLIC_KEY');
+        
+        throw new Error(`Missing EmailJS environment variables: ${missingVars.join(', ')}. Please check your Vercel environment variables configuration.`);
       }
 
       console.log('EmailJS Config:', {
