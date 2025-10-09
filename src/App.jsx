@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Calendar, Utensils, Sparkles, Mail, ChevronLeft, ChevronRight, MapPin, Clock, Cloud } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 
 // ============================================
 // MAIN APP COMPONENT - CUTE PIXEL AESTHETIC
@@ -19,11 +20,13 @@ function App() {
   });
   const [showSadMessage, setShowSadMessage] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [showSuccessGif, setShowSuccessGif] = useState(false);  // Changed from showConfetti
   const [showDateEmoji, setShowDateEmoji] = useState(false);  // New state for date emoji animation
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState(null);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailError, setEmailError] = useState(null);
 
   // ============================================
   // CUSTOMIZATION: Restaurant Options
@@ -32,37 +35,29 @@ function App() {
     { 
       id: 1, 
       name: 'AMA Raw Bar', 
-      emoji: '🍣', 
-      description: 'Japanese inspired cocktail lounge',
+      gif: 'https://media.tenor.com/83zFQf-hwLMAAAAi/tkthao219-bubududu.gif',
       cuisine: 'Japanese',
-      seating: 'Standard Seating',
       time: '7:00 PM',
     },
     {
       id: 2, 
       name: 'Ellipsis', 
-      emoji: '☕', 
-      description: 'Coffee and Cocktail Bar',
+      gif: 'https://media.tenor.com/HugZQz8YCrAAAAAj/coffee-kawaii.gif',
       cuisine: 'Coffee & Cocktail',
-      seating: 'Inside',
       time: 'Walk-in Only',
     },
     {
       id: 3, 
       name: 'Cafe La Tana', 
-      emoji: '🍝', 
-      description: 'Pasta Bar',
+      gif: 'https://media.tenor.com/l6VKmPSC2lQAAAAj/pasta-kawaii.gif',
       cuisine: 'Italian',
-      seating: 'Standard Seating',
       time: '7:30 pm',
     },
     {
       id: 4, 
       name: 'Nuba Gastown', 
-      emoji: '🕯️', 
-      description: 'Popular Lebanese eatery & juice bar with bright decor',
+      gif: 'https://media.tenor.com/PnlZyxtLuJgAAAAj/candle-kawaii.gif',
       cuisine: 'Lebanese',
-      seating: 'Standard Seating',
       time: '7:15 pm',
     }
   ];
@@ -71,11 +66,11 @@ function App() {
   // CUSTOMIZATION: Activity Options
   // ============================================
   const activities = [
-    { id: 1, name: 'Photo Booth', emoji: '📸', category: 'Romantic' },
-    { id: 2, name: 'Rec Room', emoji: '🎮', category: 'Fun' },
-    { id: 3, name: 'Italian Charm Bracelets', emoji: '💍', category: 'Sweet' },
-    { id: 4, name: 'Stroll around Downtown', emoji: '🌆', category: 'Relaxed' },
-    { id: 4, name: 'Bubb Shopping?', emoji: '🛍️', category: 'Bubb' },
+    { id: 1, name: 'Photo Booth', gif: 'https://media.tenor.com/g9VCqF9FDAYAAAAJ/camera-kawaii.gif', category: 'Romantic' },
+    { id: 2, name: 'Rec Room', gif: 'https://media.tenor.com/YbkSdj3fzHwAAAAj/gaming-kawaii.gif', category: 'Fun' },
+    { id: 3, name: 'Italian Charm Bracelets', gif: 'https://media.tenor.com/tKDxLBnTi8cAAAAj/jewelry-kawaii.gif', category: 'Sweet' },
+    { id: 4, name: 'Stroll around Downtown', gif: 'https://media.tenor.com/4l6VbzC5hcgAAAAj/walking-kawaii.gif', category: 'Relaxed' },
+    { id: 5, name: 'Bubb Shopping?', gif: 'https://media.tenor.com/WBLBKZGlM4MAAAAj/shopping-kawaii.gif', category: 'Bubb' },
   ];
 
   // ============================================
@@ -85,122 +80,181 @@ function App() {
     setWeatherLoading(true);
     setWeatherError(null);
     
-    // Get location (using Vancouver as default)
-    const location = 'Vancouver,BC,Canada';
-    
     try {
-      // Using OpenWeatherMap API for current weather
-      // Free API key for demo purposes
-      const API_KEY = 'bd5e378503939ddaee76f12ad7a97608';
+      // Use environment variable for API key (more secure)
+      const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || 'bd5e378503939ddaee76f12ad7a97608';
+      const location = 'Vancouver,BC,Canada';
+      const targetDate = '2025-10-12'; // October 12, 2025
       
-      // Get current weather
-      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${API_KEY}`);
+      console.log('Fetching weather for:', location, 'on', targetDate);
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch weather data');
+      // Get current weather first
+      const currentResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${API_KEY}`);
+      
+      if (!currentResponse.ok) {
+        const errorData = await currentResponse.json().catch(() => ({}));
+        throw new Error(`Weather API Error: ${currentResponse.status} - ${errorData.message || 'Unknown error'}`);
       }
       
-      const data = await response.json();
+      const currentData = await currentResponse.json();
+      console.log('Current weather data received:', currentData);
       
-      // Format the data to match our expected structure
-      const weatherData = {
-        location: {
-          name: data.name,
-          country: data.sys.country,
-        },
-        current: {
-          temp_c: data.main.temp,
-          condition: {
-            text: data.weather[0].main,
-            icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`,
-            code: data.weather[0].id
-          },
-          wind_kph: data.wind.speed * 3.6, // Convert m/s to km/h
-          humidity: data.main.humidity,
-        },
-        forecast: {
-          forecastday: [{
-            date: dateData.date,
-            day: {
-              avgtemp_c: data.main.temp,
-              maxtemp_c: data.main.temp_max,
-              mintemp_c: data.main.temp_min,
-              daily_chance_of_rain: data.rain ? 100 : 0, // Simplified
-              condition: {
-                text: data.weather[0].description,
-                icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`,
-                code: data.weather[0].id
-              },
-            }
-          }]
-        }
-      };
-      
-      // Get 5-day forecast to see if we can get closer to the target date
+      // Get 5-day forecast (includes October 12th since it's only 4 days away)
       const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${location}&units=metric&appid=${API_KEY}`);
       
-      if (forecastResponse.ok) {
-        const forecastData = await forecastResponse.json();
+      if (!forecastResponse.ok) {
+        const errorData = await forecastResponse.json().catch(() => ({}));
+        throw new Error(`Forecast API Error: ${forecastResponse.status} - ${errorData.message || 'Unknown error'}`);
+      }
+      
+      const forecastData = await forecastResponse.json();
+      console.log('Forecast data received:', forecastData);
+      
+      // Find the forecast for October 12, 2025
+      const targetDateObj = new Date(targetDate);
+      const targetDateString = targetDateObj.toISOString().split('T')[0]; // '2025-10-12'
+      
+      // Filter forecast entries for October 12th
+      const oct12Forecasts = forecastData.list.filter(item => {
+        const itemDate = new Date(item.dt * 1000).toISOString().split('T')[0];
+        return itemDate === targetDateString;
+      });
+      
+      console.log(`Found ${oct12Forecasts.length} forecast entries for October 12th:`, oct12Forecasts);
+      
+      let oct12Weather;
+      if (oct12Forecasts.length > 0) {
+        // Calculate daily averages from the hourly forecasts for Oct 12
+        const temps = oct12Forecasts.map(f => f.main.temp);
+        const maxTemps = oct12Forecasts.map(f => f.main.temp_max);
+        const minTemps = oct12Forecasts.map(f => f.main.temp_min);
+        const rainProbs = oct12Forecasts.map(f => f.pop || 0);
         
-        // For demonstration purposes - use the forecast for a future date
-        // In reality, most APIs don't provide forecasts for 2025
-        // We're using the last available day in the 5-day forecast
-        const lastDayForecast = forecastData.list[forecastData.list.length - 1];
+        // Use the most common weather condition
+        const conditions = oct12Forecasts.map(f => f.weather[0]);
+        const mainCondition = conditions[Math.floor(conditions.length / 2)]; // Use midday condition
         
-        weatherData.forecast.forecastday[0].day = {
-          avgtemp_c: lastDayForecast.main.temp,
-          maxtemp_c: lastDayForecast.main.temp_max,
-          mintemp_c: lastDayForecast.main.temp_min,
-          daily_chance_of_rain: lastDayForecast.pop ? Math.round(lastDayForecast.pop * 100) : 0,
+        oct12Weather = {
+          avgtemp_c: Math.round(temps.reduce((a, b) => a + b, 0) / temps.length),
+          maxtemp_c: Math.round(Math.max(...maxTemps)),
+          mintemp_c: Math.round(Math.min(...minTemps)),
+          daily_chance_of_rain: Math.round(Math.max(...rainProbs) * 100),
           condition: {
-            text: lastDayForecast.weather[0].description,
-            icon: `https://openweathermap.org/img/wn/${lastDayForecast.weather[0].icon}@2x.png`,
-            code: lastDayForecast.weather[0].id
+            text: mainCondition.description,
+            icon: `https://openweathermap.org/img/wn/${mainCondition.icon}@2x.png`,
+            code: mainCondition.id
+          },
+        };
+        
+        console.log('Calculated October 12th weather:', oct12Weather);
+      } else {
+        // Fallback to a forecast entry closest to October 12th
+        const today = new Date();
+        const daysDiff = Math.ceil((targetDateObj - today) / (1000 * 60 * 60 * 24));
+        const forecastIndex = Math.min(Math.max(0, daysDiff * 8), forecastData.list.length - 1);
+        const closestForecast = forecastData.list[forecastIndex];
+        
+        console.log(`Using closest forecast (index ${forecastIndex}):`, closestForecast);
+        
+        oct12Weather = {
+          avgtemp_c: Math.round(closestForecast.main.temp),
+          maxtemp_c: Math.round(closestForecast.main.temp_max),
+          mintemp_c: Math.round(closestForecast.main.temp_min),
+          daily_chance_of_rain: Math.round((closestForecast.pop || 0) * 100),
+          condition: {
+            text: closestForecast.weather[0].description,
+            icon: `https://openweathermap.org/img/wn/${closestForecast.weather[0].icon}@2x.png`,
+            code: closestForecast.weather[0].id
           },
         };
       }
       
-      setWeather(weatherData);
-    } catch (error) {
-      console.error('Error fetching weather:', error);
-      setWeatherError('Could not load weather data. Using typical October weather for Vancouver instead.');
-      
-      // Fallback to historical average data for Vancouver in October
-      const historicalData = {
+      // Format the final weather data structure
+      const weatherData = {
         location: {
-          name: "Vancouver",
-          region: "British Columbia",
-          country: "Canada",
+          name: currentData.name,
+          country: currentData.sys.country,
         },
         current: {
-          temp_c: 12, // Average high in Vancouver for October
+          temp_c: currentData.main.temp,
           condition: {
-            text: "Partly cloudy",
-            icon: "https://openweathermap.org/img/wn/02d@2x.png",
-            code: 1003
+            text: currentData.weather[0].main,
+            icon: `https://openweathermap.org/img/wn/${currentData.weather[0].icon}@2x.png`,
+            code: currentData.weather[0].id
           },
-          wind_kph: 12.6,
-          humidity: 80,
+          wind_kph: currentData.wind.speed * 3.6, // Convert m/s to km/h
+          humidity: currentData.main.humidity,
         },
         forecast: {
           forecastday: [{
-            date: dateData.date,
+            date: targetDate,
+            day: oct12Weather
+          }]
+        }
+      };
+      
+      setWeather(weatherData);
+      console.log('Weather successfully set for October 12th:', weatherData);
+      
+    } catch (error) {
+      console.error('Weather API Error Details:', {
+        message: error.message,
+        stack: error.stack,
+        targetDate: '2025-10-12'
+      });
+      
+      // Set specific error message based on error type
+      let errorMessage = 'Could not load weather data for October 12th. ';
+      if (error.message.includes('401')) {
+        errorMessage += 'Invalid API key.';
+      } else if (error.message.includes('404')) {
+        errorMessage += 'Location not found.';
+      } else if (error.message.includes('429')) {
+        errorMessage += 'Too many requests. Please try again later.';
+      } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorMessage += 'Network connection issue.';
+      } else {
+        errorMessage += error.message || 'Unknown error occurred.';
+      }
+      
+      setWeatherError(`${errorMessage} Using typical October weather for Vancouver instead.`);
+      
+      // Enhanced fallback data specifically for October 12th, 2025 in Vancouver
+      const fallbackData = {
+        location: {
+          name: "Vancouver",
+          region: "British Columbia", 
+          country: "Canada",
+        },
+        current: {
+          temp_c: 13, // Current temperature
+          condition: {
+            text: "Overcast",
+            icon: "https://openweathermap.org/img/wn/04d@2x.png",
+            code: 804
+          },
+          wind_kph: 12,
+          humidity: 78,
+        },
+        forecast: {
+          forecastday: [{
+            date: '2025-10-12',
             day: {
-              avgtemp_c: 12,
-              maxtemp_c: 15,
-              mintemp_c: 9,
-              daily_chance_of_rain: 60,
+              avgtemp_c: 15,
+              maxtemp_c: 18,
+              mintemp_c: 12,
+              daily_chance_of_rain: 35,
               condition: {
-                text: "Partly cloudy with occasional showers",
-                icon: "https://openweathermap.org/img/wn/10d@2x.png",
-                code: 1003
+                text: "Partly cloudy with sunny intervals",
+                icon: "https://openweathermap.org/img/wn/02d@2x.png",
+                code: 801
               },
             }
           }]
         }
       };
       
-      setWeather(historicalData);
+      setWeather(fallbackData);
     } finally {
       setWeatherLoading(false);
     }
@@ -298,15 +352,105 @@ function App() {
   // EMAIL HANDLER
   // ============================================
   const handleSendEmail = async () => {
-    console.log('Sending email with data:', dateData);
+    setEmailSending(true);
+    setEmailError(null);
     
-    // Demo mode - simulate success
-    setShowSuccess(true);
-    setShowConfetti(true);
-    setTimeout(() => {
-      setShowConfetti(false);
-      localStorage.removeItem('datePlanState');
-    }, 3000);
+    try {
+      // Initialize EmailJS with better error checking
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+      
+      // Check if all required EmailJS credentials are present
+      if (!serviceId || !templateId || !publicKey) {
+        throw new Error('Missing EmailJS credentials. Please check your .env.local file.');
+      }
+
+      console.log('EmailJS Config:', {
+        serviceId: serviceId ? 'Present' : 'Missing',
+        templateId: templateId ? 'Present' : 'Missing', 
+        publicKey: publicKey ? 'Present' : 'Missing'
+      });
+      
+      // Initialize EmailJS if not already done
+      if (typeof emailjs.init === 'function') {
+        emailjs.init(publicKey);
+      }
+      
+      // Prepare the email template parameters
+      const templateParams = {
+        to_name: 'Beautiful Girl',
+        from_name: 'Bubba',
+        date: formatDate(dateData.date),
+        restaurant: dateData.restaurant,
+        activity: dateData.activity,
+        excitement: `${dateData.excitement}/10 ${getExcitementEmoji(dateData.excitement)}`,
+        weather: weather ? 
+          `${weather.forecast.forecastday[0].day.condition.text}, High: ${Math.round(weather.forecast.forecastday[0].day.maxtemp_c)}°C, Low: ${Math.round(weather.forecast.forecastday[0].day.mintemp_c)}°C, Rain: ${weather.forecast.forecastday[0].day.daily_chance_of_rain}%` :
+          'Weather data unavailable',
+        to_email: import.meta.env.VITE_YOUR_EMAIL || 'antonflorendo7@gmail.com',
+        message: `
+🎉 Our Bubbaversary Date Plan is Ready! 🎉
+
+📅 Date: ${formatDate(dateData.date)}
+🍽️ Restaurant: ${dateData.restaurant}
+🎉 Activity: ${dateData.activity}
+✨ Excitement Level: ${dateData.excitement}/10 ${getExcitementEmoji(dateData.excitement)}
+
+🌦️ Weather Forecast: ${weather ? 
+  `${weather.forecast.forecastday[0].day.condition.text}, High: ${Math.round(weather.forecast.forecastday[0].day.maxtemp_c)}°C, Low: ${Math.round(weather.forecast.forecastday[0].day.mintemp_c)}°C, Rain: ${weather.forecast.forecastday[0].day.daily_chance_of_rain}%` :
+  'Weather data unavailable'}
+
+Can't wait for our amazing bubbaversary date! 💕
+
+With love,
+Bubba 🐱
+        `
+      };
+
+      console.log('Sending email with params:', templateParams);
+
+      // Send the email using EmailJS
+      const result = await emailjs.send(serviceId, templateId, templateParams);
+      
+      console.log('Email sent successfully:', result);
+      
+      // Show success state
+      setShowSuccess(true);
+      setShowSuccessGif(true);
+      
+      // Clear local storage and reset after delay
+      setTimeout(() => {
+        setShowSuccessGif(false);
+        localStorage.removeItem('datePlanState');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      
+      // More detailed error messages
+      let errorMessage = 'Failed to send email. ';
+      
+      if (error.message.includes('Missing EmailJS credentials')) {
+        errorMessage += 'Please check your EmailJS configuration in .env.local file.';
+      } else if (error.status === 400) {
+        errorMessage += 'Invalid template parameters. Please check your EmailJS template setup.';
+      } else if (error.status === 401) {
+        errorMessage += 'Invalid API keys. Please verify your EmailJS credentials.';
+      } else if (error.status === 402) {
+        errorMessage += 'EmailJS quota exceeded. Please check your EmailJS account.';
+      } else if (error.status === 403) {
+        errorMessage += 'EmailJS service access denied. Please check your service configuration.';
+      } else if (error.status === 404) {
+        errorMessage += 'EmailJS service or template not found. Please verify your IDs.';
+      } else {
+        errorMessage += `Error: ${error.message || 'Unknown error occurred'}`;
+      }
+      
+      setEmailError(errorMessage);
+    } finally {
+      setEmailSending(false);
+    }
   };
 
   // ============================================
@@ -334,6 +478,23 @@ function App() {
   const getExcitementEmoji = (value) => {
     const emojis = ['💔', '😔', '😐', '🙂', '😊', '😄', '😍', '🥰', '💖', '💕'];
     return emojis[value - 1] || '💖';
+  };
+
+  const getExcitementLevel = (value) => {
+    const levels = ['B', 'BU', 'BUB', 'BUBB', 'BUBBA', 'BUBBAS'];
+    return levels[value - 1] || 'BUBBAS';
+  };
+
+  const getExcitementGif = (value) => {
+    const gifs = [
+      { gif: 'https://media.tenor.com/9z8aTaVmPfwAAAAm/cats-sad.webp', text: 'Not excited' },           // 1 = B
+      { gif: 'https://media.tenor.com/M1dGKzBzKQAAAAAj/bubu-dudu-disappointed.gif', text: 'Meh' },           // 2 = BU
+      { gif: 'https://media.tenor.com/6vQbOVXvlzwAAAAj/bubu-dudu-thinking.gif', text: 'Neutral' },         // 3 = BUB
+      { gif: 'https://media.tenor.com/YbkSdj3fzHwAAAAj/bubu-dudu-okay.gif', text: 'Okay' },               // 4 = BUBB
+      { gif: 'https://media.tenor.com/83zFQf-hwLMAAAAi/tkthao219-bubududu.gif', text: 'Good' },           // 5 = BUBBA
+      { gif: 'https://media.tenor.com/HugZQz8YCrAAAAAj/coffee-kawaii.gif', text: 'MAXIMUM EXCITEMENT!' } // 6 = BUBBAS
+    ];
+    return gifs[value - 1] || gifs[5];
   };
 
   // ============================================
@@ -369,22 +530,17 @@ function App() {
                     <div className="absolute top-12 right-4 w-3 h-3 bg-pink-400 rounded-full opacity-60"></div>
                   </div>
                   
-                  {/* Floating hearts */}
-                  <div className="absolute -top-8 -left-8 text-2xl animate-bounce" style={{animationDelay: '0s'}}>💕</div>
-                  <div className="absolute -top-6 -right-10 text-xl animate-bounce" style={{animationDelay: '0.5s'}}>💖</div>
-                  <div className="absolute -bottom-4 -left-6 text-lg animate-bounce" style={{animationDelay: '1s'}}>✨</div>
-                  <div className="absolute -bottom-6 -right-8 text-xl animate-bounce" style={{animationDelay: '1.5s'}}>🌟</div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
                   Want to go on
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className="bg-gradient-to-r from-pink-500 via-red-500 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
                   a bubbaversary date?
                 </span>
               </h1>
@@ -393,37 +549,37 @@ function App() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <button
                 onClick={handleYes}
-                className="group relative px-12 py-5 bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-3xl 
+                className="group relative px-12 py-5 bg-gradient-to-r from-red-400 to-pink-500 text-white rounded-3xl 
                          font-bold text-xl shadow-2xl transform transition-all duration-300 hover:scale-110 
-                         hover:shadow-pink-400/50 hover:shadow-2xl active:scale-95 border-4 border-white
+                         hover:shadow-red-400/50 hover:shadow-2xl active:scale-95 border-4 border-white
                          animate-pulse hover:animate-none"
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
                   Yes! 💕 <Heart className="w-6 h-6 animate-pulse" fill="white" />
                 </span>
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-purple-500 to-pink-600 opacity-0 
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-pink-500 to-red-600 opacity-0 
                               group-hover:opacity-100 transition-opacity duration-300" />
               </button>
               
               <button
                 onClick={handleNo}
-                className="px-12 py-5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-3xl font-bold text-xl
+                className="px-12 py-5 bg-gradient-to-r from-red-100 to-pink-100 text-red-700 rounded-3xl font-bold text-xl
                          shadow-lg transform transition-all duration-300 hover:scale-105 hover:bg-gradient-to-r 
-                         hover:from-purple-200 hover:to-pink-200 hover:shadow-xl active:scale-95 border-4 border-purple-200"
+                         hover:from-red-200 hover:to-pink-200 hover:shadow-xl active:scale-95 border-4 border-red-200"
               >
                 No 😔
               </button>
             </div>
 
             {showSadMessage && (
-              <div className="text-3xl text-pink-600 font-bold animate-bounce">
-                <span className="inline-block animate-wiggle">🥺</span> (pretty please?)
+              <div className="text-3xl text-red-600 font-bold">
+                <span className="inline-block">🥺</span> (pretty please?)
               </div>
             )}
             
             <div className='flex justify-center items-center mt-8'>
               <div className="relative">
-                <img src="https://media.tenor.com/I_rw0vcOXJYAAAAi/dudu-bubu-cute-kiss.gif" alt="dudu kissing bubu" className="rounded-3xl border-4 border-pink-200 shadow-xl"/>
+                <img src="https://media.tenor.com/I_rw0vcOXJYAAAAi/dudu kissing bubu" alt="dudu kissing bubu" className="rounded-3xl border-4 border-pink-200 shadow-xl"/>
                 <div className="absolute -top-2 -right-2 text-2xl animate-spin" style={{animationDuration: '3s'}}>✨</div>
               </div>
             </div>
@@ -439,20 +595,20 @@ function App() {
                 <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-pink-300 rounded-2xl border-4 border-purple-400 shadow-xl animate-float">
                   <Calendar className="w-12 h-12 text-white mx-auto mt-6" />
                 </div>
-                <div className="absolute -top-2 -right-2 text-2xl animate-bounce">📅</div>
+                <div className="absolute -top-2 -right-2 text-2xl">📅</div>
               </div>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold">
-              <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent drop-shadow-lg">
+              <span className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
                 Confirm the Date
               </span>
             </h1>
             
-            <div className="text-2xl text-purple-700 space-y-3">
+            <div className="text-2xl text-red-700 space-y-3">
               <p>Our date is set for:</p>
-              <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-3xl p-6 border-4 border-pink-200 shadow-lg inline-block">
-                <p className="font-bold text-3xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <div className="bg-gradient-to-r from-red-100 to-pink-100 rounded-3xl p-6 border-4 border-red-200 shadow-lg inline-block">
+                <p className="font-bold text-3xl bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
                   {formatDate(dateData.date)}
                 </p>
               </div>
@@ -461,9 +617,9 @@ function App() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <button
                 onClick={handleDateConfirm}
-                className="group relative px-12 py-5 bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-3xl 
+                className="group relative px-12 py-5 bg-gradient-to-r from-red-400 to-pink-500 text-white rounded-3xl 
                          font-bold text-xl shadow-2xl transform transition-all duration-300 hover:scale-110 
-                         hover:shadow-pink-400/50 hover:shadow-2xl active:scale-95 border-4 border-white"
+                         hover:shadow-red-400/50 hover:shadow-2xl active:scale-95 border-4 border-white"
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
                   Perfect! 💕 <Heart className="w-6 h-6 animate-pulse" fill="white" />
@@ -472,24 +628,23 @@ function App() {
               
               <button
                 onClick={handleDateReject}
-                className="px-12 py-5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-3xl font-bold text-xl
+                className="px-12 py-5 bg-gradient-to-r from-red-100 to-pink-100 text-red-700 rounded-3xl font-bold text-xl
                          shadow-lg transform transition-all duration-300 hover:scale-105 hover:bg-gradient-to-r 
-                         hover:from-purple-200 hover:to-pink-200 hover:shadow-xl active:scale-95 border-4 border-purple-200"
+                         hover:from-red-200 hover:to-pink-200 hover:shadow-xl active:scale-95 border-4 border-red-200"
               >
                 Pick Another 😔
               </button>
             </div>
 
             {showDateEmoji && (
-              <div className="text-3xl text-pink-600 font-bold animate-bounce">
-                <span className="inline-block animate-wiggle">🥺</span> (aww, let's pick another date!)
+              <div className="text-3xl text-red-600 font-bold">
+                <span className="inline-block">🥺</span> (aww, let's pick another date!)
               </div>
             )}
 
             <div className='flex justify-center items-center mt-8'>
               <div className="relative">
-                <img src="https://media.tenor.com/hsAGv-eniwsAAAAj/bubu-yier-iklog.gif" alt="bubu dudu date" className="rounded-3xl border-4 border-pink-200 shadow-xl"/>
-                <div className="absolute -top-2 -left-2 text-2xl animate-bounce">💖</div>
+                <img src="https://media.tenor.com/hsAGv-eniwsAAAAj/bubu-dudu-date.gif" alt="bubu dudu date" className="rounded-3xl border-4 border-pink-200 shadow-xl"/>
               </div>
             </div>
           </div>
@@ -506,13 +661,13 @@ function App() {
                 </div>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
                   Restaurant Options
                 </span>
               </h2>
-              <p className="text-purple-600 text-xl">Where should we be some piggies? 🐷</p>
-              <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-2xl p-3 border-2 border-pink-200 inline-block mt-3">
-                <p className="text-purple-700 font-semibold">{formatDate(dateData.date)}</p>
+              <p className="text-red-600 text-xl">Where should we be some piggies? 🐷</p>
+              <div className="bg-gradient-to-r from-red-100 to-pink-100 rounded-2xl p-3 border-2 border-red-200 inline-block mt-3">
+                <p className="text-red-700 font-semibold">{formatDate(dateData.date)}</p>
               </div>
             </div>
             
@@ -522,10 +677,10 @@ function App() {
                   key={restaurant.id}
                   onClick={() => handleRestaurantSelect(restaurant)}
                   className={`relative p-8 rounded-3xl border-4 transition-all duration-300 transform
-                            hover:scale-[1.02] hover:shadow-2xl group bg-gradient-to-br from-white to-pink-50
+                            hover:scale-[1.02] hover:shadow-2xl group bg-gradient-to-br from-white to-red-50
                             ${dateData.restaurant === restaurant.name 
-                              ? 'border-pink-400 bg-gradient-to-br from-pink-100 to-purple-100 shadow-xl shadow-pink-300/50' 
-                              : 'border-pink-200 hover:border-purple-300'}`}
+                              ? 'border-red-400 bg-gradient-to-br from-red-100 to-pink-100 shadow-xl shadow-red-300/50' 
+                              : 'border-red-200 hover:border-red-300'}`}
                 >
                   {dateData.restaurant === restaurant.name && (
                     <div className="absolute -top-4 -right-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full p-3 animate-bounce border-4 border-white shadow-lg">
@@ -534,17 +689,13 @@ function App() {
                   )}
                   
                   <div className="flex items-start gap-6">
-                    <div className="text-6xl group-hover:scale-110 transition-transform duration-300 animate-float">
-                      {restaurant.emoji}
+                    <div className="w-16 h-16">
+                      <img src={restaurant.gif} alt={restaurant.name} className="rounded-full shadow-lg" />
                     </div>
                     <div className="flex-1 text-left">
                       <h3 className="text-2xl font-bold text-purple-800 flex items-center gap-3 mb-2">
                         {restaurant.name}
-                        <span className="text-sm font-normal text-purple-500 bg-purple-100 px-3 py-1 rounded-full border-2 border-purple-200">
-                          {restaurant.seating}
-                        </span>
                       </h3>
-                      <p className="text-purple-600 mb-4 text-lg">{restaurant.description}</p>
                       <div className="flex items-center gap-6 text-purple-500">
                         <span className="flex items-center gap-2 bg-pink-100 px-3 py-1 rounded-full border-2 border-pink-200">
                           <MapPin className="w-4 h-4" />
@@ -573,11 +724,11 @@ function App() {
                 </div>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
                   Pick our bubbventure
                 </span>
               </h2>
-              <p className="text-purple-600 text-xl">What fun should we have before dinner? ✨</p>
+              <p className="text-red-600 text-xl">What fun should we have before dinner? ✨</p>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
@@ -591,8 +742,8 @@ function App() {
                               ? 'border-pink-400 bg-gradient-to-br from-pink-400 to-purple-500 text-white shadow-xl shadow-pink-300/50'
                               : 'border-pink-200 hover:border-purple-300'}`}
                 >
-                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300 animate-float">
-                    {activity.emoji}
+                  <div className="w-16 h-16 mx-auto mb-3">
+                    <img src={activity.gif} alt={activity.name} className="rounded-full shadow-lg" />
                   </div>
                   <div className={`text-lg font-bold mb-2 ${dateData.activity === activity.name ? 'text-white' : 'text-purple-800'}`}>
                     {activity.name}
@@ -614,22 +765,34 @@ function App() {
         return (
           <div className="space-y-8">
             <div className="text-center">
-              <div className="text-8xl mb-6 animate-bounce">{getExcitementEmoji(dateData.excitement)}</div>
+              <div className="flex justify-center mb-6">
+                {/* <div className="w-32 h-32  shadow-xl overflow-hidden bg-white p-2">
+                  <img 
+                    src={getExcitementGif(dateData.excitement).gif} 
+                    alt={getExcitementGif(dateData.excitement).text}
+                    className="w-full h-full object-cover rounded-2xl"
+                  />
+                </div> */}
+              </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
                 <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent drop-shadow-lg">
                   How excited are you?
                 </span>
               </h2>
-              <p className="text-purple-600 text-xl">Rate your excitement level! 💕</p>
             </div>
             
             <div className="max-w-lg mx-auto space-y-8">
               <div className="text-center">
                 <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-3xl p-8 border-4 border-pink-200 shadow-xl">
-                  <div className="text-8xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-                    {dateData.excitement}
+                  {/* Replace the number with a GIF */}
+                  <div className="w-40 h-40 mx-auto mb-4">
+                    <img 
+                      src={getExcitementGif(dateData.excitement).gif} 
+                      alt={getExcitementGif(dateData.excitement).text}
+                      className="w-full h-full object-cover rounded-2xl"
+                    />
                   </div>
-                  <div className="text-purple-600 text-xl font-semibold">out of 10</div>
+                  <div className="text-purple-600 text-xl font-semibold">{getExcitementLevel(dateData.excitement)}</div>
                 </div>
               </div>
               
@@ -637,7 +800,7 @@ function App() {
                 <input
                   type="range"
                   min="1"
-                  max="10"
+                  max="6"
                   value={dateData.excitement}
                   onChange={(e) => setDateData(prev => ({ ...prev, excitement: parseInt(e.target.value) }))}
                   className="w-full h-4 bg-purple-200 rounded-full appearance-none cursor-pointer border-4 border-white shadow-lg
@@ -648,12 +811,12 @@ function App() {
                            [&::-webkit-slider-thumb]:cursor-pointer
                            [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-white"
                   style={{
-                    background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${dateData.excitement * 10}%, #ddd6fe ${dateData.excitement * 10}%, #ddd6fe 100%)`
+                    background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${(dateData.excitement / 6) * 100}%, #ddd6fe ${(dateData.excitement / 6) * 100}%, #ddd6fe 100%)`
                   }}
                 />
                 <div className="flex justify-between mt-6 text-purple-600 font-semibold">
-                  <span className="bg-purple-100 px-3 py-1 rounded-full border-2 border-purple-200">Meh 😐</span>
-                  <span className="bg-pink-100 px-3 py-1 rounded-full border-2 border-pink-200">SUPER EXCITED! 🎉</span>
+                  <span className="bg-purple-100 px-3 py-1 rounded-full border-2 border-purple-200">B 😐</span>
+                  <span className="bg-pink-100 px-3 py-1 rounded-full border-2 border-pink-200">BUBBAS! 🎉</span>
                 </div>
               </div>
             </div>
@@ -784,24 +947,43 @@ function App() {
 
               <button
                 onClick={handleSendEmail}
-                className="w-full mt-8 py-6 bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-3xl 
-                         font-bold text-xl shadow-2xl transform transition-all duration-300 hover:scale-105
-                         hover:shadow-pink-400/50 hover:shadow-2xl active:scale-95 flex items-center 
-                         justify-center gap-4 border-4 border-white animate-pulse hover:animate-none"
+                disabled={emailSending}
+                className={`w-full mt-8 py-6 rounded-3xl 
+                         font-bold text-xl shadow-2xl transform transition-all duration-300 
+                         active:scale-95 flex items-center 
+                         justify-center gap-4 border-4 border-white
+                         ${emailSending 
+                           ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed opacity-75' 
+                           : 'bg-gradient-to-r from-pink-400 to-purple-500 text-white hover:scale-105 hover:shadow-pink-400/50 hover:shadow-2xl animate-pulse hover:animate-none'}`}
               >
-                <Mail className="w-7 h-7" />
-                Send me our plan
-                <Heart className="w-6 h-6" fill="white" />
+                {emailSending ? (
+                  <>
+                    <div className="h-7 w-7 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Sending...
+                    <Heart className="w-6 h-6" fill="white" />
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-7 h-7" />
+                    Send me our plan
+                    <Heart className="w-6 h-6" fill="white" />
+                  </>
+                )}
               </button>
+
+              {emailError && (
+                <div className="mt-4 text-center">
+                  <div className="text-pink-600 font-semibold bg-pink-50 rounded-2xl p-4 border-2 border-pink-200">
+                    {emailError} 😔
+                  </div>
+                </div>
+              )}
 
               {showSuccess && (
                 <div className="mt-8 text-center">
-                  <div className="text-3xl font-bold text-pink-600 animate-bounce mb-3">
-                    <span className="inline-block animate-wiggle">🎉</span> Yaaay! Can't wait! <span className="inline-block animate-wiggle">💕</span>
+                  <div className="text-3xl font-bold text-pink-600 mb-3">
+                    <span className="inline-block"></span> Let's BUBB go!!! <span className="inline-block">💕</span>
                   </div>
-                  <p className="text-purple-600 font-semibold bg-purple-100 rounded-2xl p-4 border-2 border-purple-200">
-                    Check your email for our date details! 📧✨
-                  </p>
                 </div>
               )}
             </div>
@@ -823,16 +1005,10 @@ function App() {
         <div className="absolute top-20 right-20 w-32 h-32 bg-pink-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse" />
         <div className="absolute bottom-20 left-20 w-40 h-40 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse animation-delay-2000" />
         <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-pink-400 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-pulse animation-delay-4000" />
-        
-        {/* Floating elements */}
-        <div className="absolute top-1/4 left-1/4 text-3xl animate-float" style={{animationDelay: '0s'}}>✨</div>
-        <div className="absolute top-3/4 right-1/4 text-2xl animate-float" style={{animationDelay: '1s'}}>💕</div>
-        <div className="absolute top-1/2 right-1/6 text-2xl animate-float" style={{animationDelay: '2s'}}>🌟</div>
-        <div className="absolute bottom-1/4 left-1/6 text-3xl animate-float" style={{animationDelay: '3s'}}>💖</div>
       </div>
 
       {/* Confetti */}
-      {showConfetti && <DateEmojiAnimation />}
+      {showSuccessGif && <SuccessGifAnimation />}
       
       {/* Main Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
@@ -878,31 +1054,24 @@ function App() {
 }
 
 // ============================================
-// DATE EMOJI ANIMATION COMPONENT
+// SUCCESS GIF ANIMATION COMPONENT
 // ============================================
-const DateEmojiAnimation = () => {
-  const emojis = ['😢', '😭', '🥺', '💔', '😿', '🙏'];
-  const pieces = Array.from({ length: 20 }, (_, i) => i);
-  
+const SuccessGifAnimation = () => {
   return (
     <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
-      {pieces.map((piece) => (
-        <div
-          key={piece}
-          className="absolute animate-spin"
-          style={{
-            left: `${20 + Math.random() * 60}%`,
-            top: `${20 + Math.random() * 60}%`,
-            animationDelay: `${Math.random() * 0.5}s`,
-            animationDuration: `${1 + Math.random() * 2}s`,
-            transform: `scale(${0.5 + Math.random() * 1.5})`
-          }}
-        >
-          <div className="text-3xl">
-            {emojis[Math.floor(Math.random() * emojis.length)]}
-          </div>
+      <div className="animate-bounce-in-scale">
+        <div className="relative">
+          <img 
+            src="https://media.tenor.com/n6YQ_qcvFMUAAAAj/bubu-dudu-love.gi" 
+            alt="Success celebration" 
+            className="w-80 h-80 rounded-3xl border-8 border-pink-300 shadow-2xl bg-white p-4"
+          />
+          {/* <div className="absolute -top-4 -left-4 text-4xl animate-spin" style={{animationDuration: '2s'}}>💕</div>
+          <div className="absolute -top-4 -right-4 text-4xl animate-pulse">✨</div>
+          <div className="absolute -bottom-4 -left-4 text-4xl animate-bounce">🎉</div>
+          <div className="absolute -bottom-4 -right-4 text-4xl animate-pulse">💖</div> */}
         </div>
-      ))}
+      </div>
     </div>
   );
 };
