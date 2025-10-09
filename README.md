@@ -1,5 +1,5 @@
 # Bubbaversary Website
-<img src="https://tenor.com/view/dudu-give-flowers-bubu-gif-peachugomu-gif-17912197142039195921">
+<img src="https://media.tenor.com/-JToZdYDcREAAAAj/dudu-give-flowers-bubu-gif.gif">
 <br>
 
 ---
