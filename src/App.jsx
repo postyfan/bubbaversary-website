@@ -12,7 +12,7 @@ function App() {
   const [currentStep, setCurrentStep] = useState(1);
   const [dateData, setDateData] = useState({
     answerYes: false,
-    date: '2025-10-15', // Updated date here - change to your preferred date
+    date: '2025-10-13', // Updated date here - change to your preferred date
     dateConfirmed: false,  // New state for date confirmation
     restaurant: '',
     activity: '',
