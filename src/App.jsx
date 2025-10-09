@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Calendar, Utensils, Sparkles, Mail, ChevronLeft, ChevronRight, MapPin, Clock } from 'lucide-react';
+import { Heart, Calendar, Utensils, Sparkles, Mail, ChevronLeft, ChevronRight, MapPin, Clock, Moon, Sun } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 
 // ============================================
@@ -10,6 +10,7 @@ function App() {
   // STATE MANAGEMENT
   // ============================================
   const [currentStep, setCurrentStep] = useState(1);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [dateData, setDateData] = useState({
     answerYes: false,
     date: '2025-10-13', // Updated date here - change to your preferred date
@@ -81,6 +82,12 @@ function App() {
   // LIFECYCLE HOOKS
   // ============================================
   useEffect(() => {
+    // Load dark mode preference
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode !== null) {
+      setIsDarkMode(JSON.parse(savedDarkMode));
+    }
+    
     // Clear any old stored data when first loading the app
     if (currentStep === 1) {
       localStorage.removeItem('datePlanState');
@@ -99,6 +106,11 @@ function App() {
       }
     }
   }, []);
+
+  // Save dark mode preference
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
 
   // Save state to localStorage
   useEffect(() => {
@@ -317,23 +329,23 @@ Bubba 🐱
                 <div className="relative">
                   {/* Main cute cat character */}
                   <div className="w-32 h-32 relative animate-float">
-                    <div className="absolute inset-0 bg-gradient-to-b from-pink-200 to-pink-300 rounded-full border-4 border-purple-300 shadow-lg"></div>
+                    <div className={`absolute inset-0 bg-gradient-to-b ${isDarkMode ? 'from-red-400 to-red-500' : 'from-pink-200 to-pink-300'} rounded-full border-4 ${isDarkMode ? 'border-red-300' : 'border-purple-300'} shadow-lg`}></div>
                     {/* Cat ears */}
-                    <div className="absolute -top-4 left-6 w-6 h-8 bg-pink-200 border-2 border-purple-300 rounded-full transform rotate-12"></div>
-                    <div className="absolute -top-4 right-6 w-6 h-8 bg-pink-200 border-2 border-purple-300 rounded-full transform -rotate-12"></div>
+                    <div className={`absolute -top-4 left-6 w-6 h-8 ${isDarkMode ? 'bg-red-400 border-red-300' : 'bg-pink-200 border-purple-300'} border-2 rounded-full transform rotate-12`}></div>
+                    <div className={`absolute -top-4 right-6 w-6 h-8 ${isDarkMode ? 'bg-red-400 border-red-300' : 'bg-pink-200 border-purple-300'} border-2 rounded-full transform -rotate-12`}></div>
                     {/* Inner ears */}
-                    <div className="absolute -top-2 left-7 w-3 h-4 bg-pink-400 rounded-full"></div>
-                    <div className="absolute -top-2 right-7 w-3 h-4 bg-pink-400 rounded-full"></div>
+                    <div className={`absolute -top-2 left-7 w-3 h-4 ${isDarkMode ? 'bg-red-500' : 'bg-pink-400'} rounded-full`}></div>
+                    <div className={`absolute -top-2 right-7 w-3 h-4 ${isDarkMode ? 'bg-red-500' : 'bg-pink-400'} rounded-full`}></div>
                     {/* Eyes */}
-                    <div className="absolute top-8 left-8 w-4 h-4 bg-purple-800 rounded-full animate-pulse"></div>
-                    <div className="absolute top-8 right-8 w-4 h-4 bg-purple-800 rounded-full animate-pulse"></div>
+                    <div className={`absolute top-8 left-8 w-4 h-4 ${isDarkMode ? 'bg-white' : 'bg-purple-800'} rounded-full animate-pulse`}></div>
+                    <div className={`absolute top-8 right-8 w-4 h-4 ${isDarkMode ? 'bg-white' : 'bg-purple-800'} rounded-full animate-pulse`}></div>
                     {/* Nose */}
-                    <div className="absolute top-14 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-pink-500 rounded-full"></div>
+                    <div className={`absolute top-14 left-1/2 transform -translate-x-1/2 w-2 h-2 ${isDarkMode ? 'bg-red-600' : 'bg-pink-500'} rounded-full`}></div>
                     {/* Mouth */}
-                    <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-pink-600 rounded-full"></div>
+                    <div className={`absolute top-16 left-1/2 transform -translate-x-1/2 w-4 h-1 ${isDarkMode ? 'bg-red-700' : 'bg-pink-600'} rounded-full`}></div>
                     {/* Blush */}
-                    <div className="absolute top-12 left-4 w-3 h-3 bg-pink-400 rounded-full opacity-60"></div>
-                    <div className="absolute top-12 right-4 w-3 h-3 bg-pink-400 rounded-full opacity-60"></div>
+                    <div className={`absolute top-12 left-4 w-3 h-3 ${isDarkMode ? 'bg-red-500' : 'bg-pink-400'} rounded-full opacity-60`}></div>
+                    <div className={`absolute top-12 right-4 w-3 h-3 ${isDarkMode ? 'bg-red-500' : 'bg-pink-400'} rounded-full opacity-60`}></div>
                   </div>
                   
                 </div>
@@ -342,11 +354,11 @@ Bubba 🐱
 
             <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                <span className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className={`bg-gradient-to-r ${isDarkMode ? 'from-red-400 via-red-500 to-red-600' : 'from-red-500 via-pink-500 to-red-600'} bg-clip-text text-transparent drop-shadow-lg`}>
                   Want to go on
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-pink-500 via-red-500 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className={`bg-gradient-to-r ${isDarkMode ? 'from-red-500 via-red-400 to-red-600' : 'from-pink-500 via-red-500 to-pink-600'} bg-clip-text text-transparent drop-shadow-lg`}>
                   a bubbaversary date?
                 </span>
               </h1>
@@ -355,37 +367,37 @@ Bubba 🐱
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <button
                 onClick={handleYes}
-                className="group relative px-12 py-5 bg-gradient-to-r from-red-400 to-pink-500 text-white rounded-3xl 
+                className={`group relative px-12 py-5 bg-gradient-to-r ${isDarkMode ? 'from-red-500 to-red-600' : 'from-red-400 to-pink-500'} text-white rounded-3xl 
                          font-bold text-xl shadow-2xl transform transition-all duration-300 hover:scale-110 
                          hover:shadow-red-400/50 hover:shadow-2xl active:scale-95 border-4 border-white
-                         animate-pulse hover:animate-none"
+                         animate-pulse hover:animate-none`}
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
                   Yes! 💕 <Heart className="w-6 h-6 animate-pulse" fill="white" />
                 </span>
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-pink-500 to-red-600 opacity-0 
-                              group-hover:opacity-100 transition-opacity duration-300" />
+                <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${isDarkMode ? 'from-red-600 to-red-700' : 'from-pink-500 to-red-600'} opacity-0 
+                              group-hover:opacity-100 transition-opacity duration-300`} />
               </button>
               
               <button
                 onClick={handleNo}
-                className="px-12 py-5 bg-gradient-to-r from-red-100 to-pink-100 text-red-700 rounded-3xl font-bold text-xl
+                className={`px-12 py-5 bg-gradient-to-r ${isDarkMode ? 'from-gray-600 to-gray-700 text-red-300' : 'from-red-100 to-pink-100 text-red-700'} rounded-3xl font-bold text-xl
                          shadow-lg transform transition-all duration-300 hover:scale-105 hover:bg-gradient-to-r 
-                         hover:from-red-200 hover:to-pink-200 hover:shadow-xl active:scale-95 border-4 border-red-200"
+                         ${isDarkMode ? 'hover:from-gray-500 hover:to-gray-600 border-4 border-gray-500' : 'hover:from-red-200 hover:to-pink-200 border-4 border-red-200'} hover:shadow-xl active:scale-95`}
               >
                 No 😔
               </button>
             </div>
 
             {showSadMessage && (
-              <div className="text-3xl text-red-600 font-bold">
+              <div className={`text-3xl ${isDarkMode ? 'text-red-400' : 'text-red-600'} font-bold`}>
                 <span className="inline-block">🥺</span> (pretty please?)
               </div>
             )}
             
             <div className='flex justify-center items-center mt-8'>
               <div className="relative">
-                <img src="https://media.tenor.com/I_rw0vcOXJYAAAAi/dudu kissing bubu" alt="dudu kissing bubu" className="rounded-3xl border-4 border-pink-200 shadow-xl"/>
+                <img src="https://media.tenor.com/I_rw0vcOXJYAAAAi/dudu kissing bubu" alt="dudu kissing bubu" className={`rounded-3xl border-4 ${isDarkMode ? 'border-red-400' : 'border-pink-200'} shadow-xl`}/>
               </div>
             </div>
           </div>
@@ -397,22 +409,22 @@ Bubba 🐱
             {/* Cute calendar icon */}
             <div className="flex justify-center mb-8">
               <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-pink-300 rounded-2xl border-4 border-purple-400 shadow-xl animate-none">
+                <div className={`w-24 h-24 bg-gradient-to-b ${isDarkMode ? 'from-red-500 to-red-600' : 'from-purple-300 to-pink-300'} rounded-2xl border-4 ${isDarkMode ? 'border-red-400' : 'border-purple-400'} shadow-xl animate-none`}>
                   <Calendar className="w-12 h-12 text-white mx-auto mt-6" />
                 </div>
               </div>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold">
-              <span className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
+              <span className={`bg-gradient-to-r ${isDarkMode ? 'from-red-400 via-red-500 to-red-600' : 'from-red-500 via-pink-500 to-red-600'} bg-clip-text text-transparent drop-shadow-lg`}>
                 Confirm the Date
               </span>
             </h1>
             
-            <div className="text-2xl text-red-700 space-y-3">
+            <div className={`text-2xl ${isDarkMode ? 'text-red-300' : 'text-red-700'} space-y-3`}>
               <p>Our date is set for:</p>
-              <div className="bg-gradient-to-r from-red-100 to-pink-100 rounded-3xl p-6 border-4 border-red-200 shadow-lg inline-block">
-                <p className="font-bold text-3xl bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+              <div className={`bg-gradient-to-r ${isDarkMode ? 'from-gray-700 to-gray-800' : 'from-red-100 to-pink-100'} rounded-3xl p-6 border-4 ${isDarkMode ? 'border-red-400' : 'border-red-200'} shadow-lg inline-block`}>
+                <p className={`font-bold text-3xl bg-gradient-to-r ${isDarkMode ? 'from-red-400 to-red-500' : 'from-red-600 to-pink-600'} bg-clip-text text-transparent`}>
                   {formatDate(dateData.date)}
                 </p>
               </div>
@@ -421,9 +433,9 @@ Bubba 🐱
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <button
                 onClick={handleDateConfirm}
-                className="group relative px-12 py-5 bg-gradient-to-r from-red-400 to-pink-500 text-white rounded-3xl 
+                className={`group relative px-12 py-5 bg-gradient-to-r ${isDarkMode ? 'from-red-500 to-red-600' : 'from-red-400 to-pink-500'} text-white rounded-3xl 
                          font-bold text-xl shadow-2xl transform transition-all duration-300 hover:scale-110 
-                         hover:shadow-red-400/50 hover:shadow-2xl active:scale-95 border-4 border-white"
+                         hover:shadow-red-400/50 hover:shadow-2xl active:scale-95 border-4 border-white`}
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
                   BUBB Perfect <Heart className="w-6 h-6 animate-pulse" fill="white" />
@@ -432,23 +444,23 @@ Bubba 🐱
               
               <button
                 onClick={handleDateReject}
-                className="px-12 py-5 bg-gradient-to-r from-red-100 to-pink-100 text-red-700 rounded-3xl font-bold text-xl
+                className={`px-12 py-5 bg-gradient-to-r ${isDarkMode ? 'from-gray-600 to-gray-700 text-red-300' : 'from-red-100 to-pink-100 text-red-700'} rounded-3xl font-bold text-xl
                          shadow-lg transform transition-all duration-300 hover:scale-105 hover:bg-gradient-to-r 
-                         hover:from-red-200 hover:to-pink-200 hover:shadow-xl active:scale-95 border-4 border-red-200"
+                         ${isDarkMode ? 'hover:from-gray-500 hover:to-gray-600 border-4 border-gray-500' : 'hover:from-red-200 hover:to-pink-200 border-4 border-red-200'} hover:shadow-xl active:scale-95`}
               >
                 BUBB NO 😔
               </button>
             </div>
 
             {showDateEmoji && (
-              <div className="text-3xl text-red-600 font-bold">
+              <div className={`text-3xl ${isDarkMode ? 'text-red-400' : 'text-red-600'} font-bold`}>
                 <span className="inline-block">🥺</span> (aww, let's pick another date!)
               </div>
             )}
 
             <div className='flex justify-center items-center mt-8'>
               <div className="relative">
-                <img src="https://media.tenor.com/hsAGv-eniwsAAAAj/bubu-dudu-date.gif" alt="bubu dudu date" className="rounded-3xl border-4 border-pink-200 shadow-xl"/>
+                <img src="https://media.tenor.com/hsAGv-eniwsAAAAj/bubu-dudu-date.gif" alt="bubu dudu date" className={`rounded-3xl border-4 ${isDarkMode ? 'border-red-400' : 'border-pink-200'} shadow-xl`}/>
               </div>
             </div>
           </div>
@@ -460,17 +472,17 @@ Bubba 🐱
             <div className="text-center">
               <div className='flex justify-center items-center mb-6'>
                 <div className="relative">
-                  <img src="https://media.tenor.com/DBImicQnTG0AAAAj/bubu-dudu-eat.gif" alt="" className="rounded-3xl border-4 border-pink-200 shadow-xl"/>
+                  <img src="https://media.tenor.com/DBImicQnTG0AAAAj/bubu-dudu-eat.gif" alt="" className={`rounded-3xl border-4 ${isDarkMode ? 'border-red-400' : 'border-pink-200'} shadow-xl`}/>
                 </div>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className={`bg-gradient-to-r ${isDarkMode ? 'from-red-400 via-red-500 to-red-600' : 'from-red-500 via-pink-500 to-red-600'} bg-clip-text text-transparent drop-shadow-lg`}>
                   Restaurant Options
                 </span>
               </h2>
-              <p className="text-red-600 text-xl">Where should we be some piggies? 🐷</p>
-              <div className="bg-gradient-to-r from-red-100 to-pink-100 rounded-2xl p-3 border-2 border-red-200 inline-block mt-3">
-                <p className="text-red-700 font-semibold">{formatDate(dateData.date)}</p>
+              <p className={`${isDarkMode ? 'text-red-300' : 'text-red-600'} text-xl`}>Where should we be some piggies? 🐷</p>
+              <div className={`bg-gradient-to-r ${isDarkMode ? 'from-gray-700 to-gray-800' : 'from-red-100 to-pink-100'} rounded-2xl p-3 border-2 ${isDarkMode ? 'border-red-400' : 'border-red-200'} inline-block mt-3`}>
+                <p className={`${isDarkMode ? 'text-red-300' : 'text-red-700'} font-semibold`}>{formatDate(dateData.date)}</p>
               </div>
             </div>
             
@@ -480,13 +492,13 @@ Bubba 🐱
                   key={restaurant.id}
                   onClick={() => handleRestaurantSelect(restaurant)}
                   className={`relative p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border-4 transition-all duration-300 transform
-                            hover:scale-[1.02] hover:shadow-2xl group bg-gradient-to-br from-white to-red-50
+                            hover:scale-[1.02] hover:shadow-2xl group ${isDarkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700' : 'bg-gradient-to-br from-white to-red-50'}
                             ${dateData.restaurant === restaurant.name 
-                              ? 'border-red-400 bg-gradient-to-br from-red-100 to-pink-100 shadow-xl shadow-red-300/50' 
-                              : 'border-red-200 hover:border-red-300'}`}
+                              ? `border-red-400 ${isDarkMode ? 'bg-gradient-to-br from-gray-700 to-gray-600 shadow-xl shadow-red-500/30' : 'bg-gradient-to-br from-red-100 to-pink-100 shadow-xl shadow-red-300/50'}` 
+                              : `${isDarkMode ? 'border-gray-600 hover:border-red-400' : 'border-red-200 hover:border-red-300'}`}`}
                 >
                   {dateData.restaurant === restaurant.name && (
-                    <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full p-2 sm:p-3 animate-bounce-slow border-2 sm:border-4 border-white shadow-lg">
+                    <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full p-2 sm:p-3 animate-bounce-slow border-2 sm:border-4 border-white shadow-lg">
                       <Heart className="w-4 h-4 sm:w-5 sm:h-5" fill="white" />
                     </div>
                   )}
@@ -496,15 +508,15 @@ Bubba 🐱
                       <img src={restaurant.gif} alt={restaurant.name} className="rounded-full shadow-lg w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 text-left min-w-0">
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-800 flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                      <h3 className={`text-lg sm:text-xl md:text-2xl font-bold ${isDarkMode ? 'text-red-300' : 'text-purple-800'} flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2`}>
                         {restaurant.name}
                       </h3>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 md:gap-6 text-purple-500">
-                        <span className="flex items-center gap-1 sm:gap-2 bg-pink-100 px-2 sm:px-3 py-1 rounded-full border-2 border-pink-200 text-xs sm:text-sm">
+                      <div className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 md:gap-6 ${isDarkMode ? 'text-red-400' : 'text-purple-500'}`}>
+                        <span className={`flex items-center gap-1 sm:gap-2 ${isDarkMode ? 'bg-gray-600 border-gray-500' : 'bg-pink-100 border-pink-200'} px-2 sm:px-3 py-1 rounded-full border-2 text-xs sm:text-sm`}>
                           <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                           <span className="truncate">{restaurant.cuisine}</span>
                         </span>
-                        <span className="flex items-center gap-1 sm:gap-2 bg-purple-100 px-2 sm:px-3 py-1 rounded-full border-2 border-purple-200 text-xs sm:text-sm">
+                        <span className={`flex items-center gap-1 sm:gap-2 ${isDarkMode ? 'bg-gray-600 border-gray-500' : 'bg-purple-100 border-purple-200'} px-2 sm:px-3 py-1 rounded-full border-2 text-xs sm:text-sm`}>
                           <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                           <span className="truncate">{restaurant.time}</span>
                         </span>
@@ -522,16 +534,16 @@ Bubba 🐱
           <div className="space-y-8">
             <div className="text-center">
               <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-red-300 rounded-2xl border-4 border-purple-400 shadow-xl animate-none">
+                <div className={`w-24 h-24 bg-gradient-to-b ${isDarkMode ? 'from-red-500 to-red-600' : 'from-purple-300 to-red-300'} rounded-2xl border-4 ${isDarkMode ? 'border-red-400' : 'border-purple-400'} shadow-xl animate-none`}>
                   <Sparkles className="w-12 h-12 text-white mx-auto mt-6" />
                 </div>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className={`bg-gradient-to-r ${isDarkMode ? 'from-red-400 via-red-500 to-red-600' : 'from-red-500 via-pink-500 to-red-600'} bg-clip-text text-transparent drop-shadow-lg`}>
                   Pick our bubbventure
                 </span>
               </h2>
-              <p className="text-red-600 text-xl">What fun should we have before dinner? ✨</p>
+              <p className={`${isDarkMode ? 'text-red-300' : 'text-red-600'} text-xl`}>What fun should we have before dinner? ✨</p>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
@@ -540,21 +552,21 @@ Bubba 🐱
                   key={activity.id}
                   onClick={() => handleActivitySelect(activity)}
                   className={`relative p-6 rounded-3xl border-4 transition-all duration-300 transform
-                            hover:scale-105 hover:shadow-xl group bg-gradient-to-br from-white to-pink-50
+                            hover:scale-105 hover:shadow-xl group ${isDarkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700' : 'bg-gradient-to-br from-white to-pink-50'}
                             ${dateData.activity === activity.name
-                              ? 'border-pink-400 bg-gradient-to-br from-pink-400 to-purple-500 text-white shadow-xl shadow-pink-300/50'
-                              : 'border-pink-200 hover:border-purple-300'}`}
+                              ? `border-red-400 ${isDarkMode ? 'bg-gradient-to-br from-red-600 to-red-700 text-white shadow-xl shadow-red-500/30' : 'bg-gradient-to-br from-pink-400 to-purple-500 text-white shadow-xl shadow-pink-300/50'}`
+                              : `${isDarkMode ? 'border-gray-600 hover:border-red-400' : 'border-pink-200 hover:border-purple-300'}`}`}
                 >
                   <div className="w-16 h-16 mx-auto mb-3">
                     <img src={activity.gif} alt={activity.name} className="rounded-full shadow-lg" />
                   </div>
-                  <div className={`text-lg font-bold mb-2 ${dateData.activity === activity.name ? 'text-white' : 'text-purple-800'}`}>
+                  <div className={`text-lg font-bold mb-2 ${dateData.activity === activity.name ? 'text-white' : (isDarkMode ? 'text-red-300' : 'text-purple-800')}`}>
                     {activity.name}
                   </div>
                   <div className={`text-sm px-3 py-1 rounded-full border-2 ${
                     dateData.activity === activity.name 
-                      ? 'text-pink-100 bg-pink-500/30 border-pink-200' 
-                      : 'text-purple-500 bg-purple-100 border-purple-200'
+                      ? (isDarkMode ? 'text-red-100 bg-red-500/30 border-red-300' : 'text-pink-100 bg-pink-500/30 border-pink-200')
+                      : (isDarkMode ? 'text-red-400 bg-gray-600 border-gray-500' : 'text-purple-500 bg-purple-100 border-purple-200')
                   }`}>
                     {activity.category}
                   </div>
@@ -578,7 +590,7 @@ Bubba 🐱
                 </div> */}
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className={`bg-gradient-to-r ${isDarkMode ? 'from-red-400 via-red-500 to-red-600' : 'from-purple-500 via-pink-500 to-purple-600'} bg-clip-text text-transparent drop-shadow-lg`}>
                   How excited are you?
                 </span>
               </h2>
@@ -586,7 +598,7 @@ Bubba 🐱
             
             <div className="max-w-lg mx-auto space-y-8">
               <div className="text-center">
-                <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-3xl p-8 border-4 border-pink-200 shadow-xl">
+                <div className={`bg-gradient-to-r ${isDarkMode ? 'from-gray-700 to-gray-800' : 'from-pink-100 to-purple-100'} rounded-3xl p-8 border-4 ${isDarkMode ? 'border-red-400' : 'border-pink-200'} shadow-xl`}>
                   {/* Replace the number with a GIF */}
                   <div className="w-40 h-40 mx-auto mb-4">
                     <img 
@@ -595,7 +607,7 @@ Bubba 🐱
                       className="w-full h-full object-cover rounded-2xl"
                     />
                   </div>
-                  <div className="text-purple-600 text-xl font-semibold">{getExcitementLevel(dateData.excitement)}</div>
+                  <div className={`${isDarkMode ? 'text-red-300' : 'text-purple-600'} text-xl font-semibold`}>{getExcitementLevel(dateData.excitement)}</div>
                 </div>
               </div>
               
@@ -606,21 +618,20 @@ Bubba 🐱
                   max="6"
                   value={dateData.excitement}
                   onChange={(e) => setDateData(prev => ({ ...prev, excitement: parseInt(e.target.value) }))}
-                  className="w-full h-4 bg-purple-200 rounded-full appearance-none cursor-pointer border-4 border-white shadow-lg
+                  className={`w-full h-4 ${isDarkMode ? 'bg-gray-600' : 'bg-purple-200'} rounded-full appearance-none cursor-pointer border-4 border-white shadow-lg
                            [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-10 
                            [&::-webkit-slider-thumb]:h-10 [&::-webkit-slider-thumb]:rounded-full 
-                           [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-pink-400 
-                           [&::-webkit-slider-thumb]:to-purple-500 [&::-webkit-slider-thumb]:shadow-xl
+                           [&::-webkit-slider-thumb]:bg-gradient-to-r ${isDarkMode ? '[&::-webkit-slider-thumb]:from-red-400 [&::-webkit-slider-thumb]:to-red-500' : '[&::-webkit-slider-thumb]:from-pink-400 [&::-webkit-slider-thumb]:to-purple-500'} [&::-webkit-slider-thumb]:shadow-xl
                            [&::-webkit-slider-thumb]:cursor-pointer
-                           [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-white"
+                           [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-white`}
                   style={{
-                    background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${(dateData.excitement / 6) * 100}%, #ddd6fe ${(dateData.excitement / 6) * 100}%, #ddd6fe 100%)`
+                    background: `linear-gradient(to right, ${isDarkMode ? '#ef4444' : '#ec4899'} 0%, ${isDarkMode ? '#ef4444' : '#ec4899'} ${(dateData.excitement / 6) * 100}%, ${isDarkMode ? '#6b7280' : '#ddd6fe'} ${(dateData.excitement / 6) * 100}%, ${isDarkMode ? '#6b7280' : '#ddd6fe'} 100%)`
                   }}
                 />
-                <div className="flex justify-between mt-6 text-purple-600 font-semibold">
-                  <span className="bg-purple-100 px-1 py-1 rounded-full border-2 border-purple-200"><img src="https://media.tenor.com/Y3j6d3RoSEoAAAA1/sad-cat-content-aware-scale.webp" alt="" className='rounded-full w-12 h-12'/></span>
+                <div className={`flex justify-between mt-6 ${isDarkMode ? 'text-red-300' : 'text-purple-600'} font-semibold`}>
+                  <span className={`${isDarkMode ? 'bg-gray-600 border-gray-500' : 'bg-purple-100 border-purple-200'} px-1 py-1 rounded-full border-2`}><img src="https://media.tenor.com/Y3j6d3RoSEoAAAA1/sad-cat-content-aware-scale.webp" alt="" className='rounded-full w-12 h-12'/></span>
                   
-                  <span className="bg-purple-100 px-1 py-1 rounded-full border-2 border-purple-200"><img src="https://media.tenor.com/CnP64S7lszwAAAAm/meme-cat-cat-meme.webpp" alt="" className='rounded-full w-12 h-12'/></span>
+                  <span className={`${isDarkMode ? 'bg-gray-600 border-gray-500' : 'bg-purple-100 border-purple-200'} px-1 py-1 rounded-full border-2`}><img src="https://media.tenor.com/CnP64S7lszwAAAAm/meme-cat-cat-meme.webpp" alt="" className='rounded-full w-12 h-12'/></span>
                 </div>
               </div>
             </div>
@@ -632,63 +643,63 @@ Bubba 🐱
           <div className="space-y-8">
             <div className="text-center">
               <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 bg-gradient-to-b from-purple-300 to-pink-300 rounded-2xl border-4 border-purple-400 shadow-xl">
+                <div className={`w-24 h-24 bg-gradient-to-b ${isDarkMode ? 'from-red-500 to-red-600' : 'from-purple-300 to-pink-300'} rounded-2xl border-4 ${isDarkMode ? 'border-red-400' : 'border-purple-400'} shadow-xl`}>
                   <Mail className="w-12 h-12 text-white mx-auto mt-6" />
                 </div>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 bg-clip-text text-transparent drop-shadow-lg">
+                <span className={`bg-gradient-to-r ${isDarkMode ? 'from-red-400 via-red-500 to-red-600' : 'from-purple-500 via-pink-500 to-purple-600'} bg-clip-text text-transparent drop-shadow-lg`}>
                   Perfect! Let's confirm
                 </span>
               </h2>
-              <p className="text-purple-600 text-xl">Review our bubbtastic date plan 💕</p>
+              <p className={`${isDarkMode ? 'text-red-300' : 'text-purple-600'} text-xl`}>Review our bubbtastic date plan 💕</p>
             </div>
             
             <div className="max-w-lg mx-auto">
-              <div className="bg-gradient-to-br from-pink-50 via-purple-50 to-pink-50 rounded-3xl p-8 shadow-2xl border-4 border-pink-200">
-                <h3 className="text-3xl font-bold text-purple-800 mb-8 text-center flex items-center justify-center gap-3">
-                  <Heart className="w-7 h-7 text-pink-500 animate-pulse" fill="currentColor" />
+              <div className={`bg-gradient-to-br ${isDarkMode ? 'from-gray-700 via-gray-800 to-gray-700' : 'from-pink-50 via-purple-50 to-pink-50'} rounded-3xl p-8 shadow-2xl border-4 ${isDarkMode ? 'border-red-400' : 'border-pink-200'}`}>
+                <h3 className={`text-3xl font-bold ${isDarkMode ? 'text-red-300' : 'text-purple-800'} mb-8 text-center flex items-center justify-center gap-3`}>
+                  <Heart className={`w-7 h-7 ${isDarkMode ? 'text-red-400' : 'text-pink-500'} animate-pulse`} fill="currentColor" />
                   Our Date Plan
-                  <Heart className="w-7 h-7 text-pink-500 animate-pulse" fill="currentColor" />
+                  <Heart className={`w-7 h-7 ${isDarkMode ? 'text-red-400' : 'text-pink-500'} animate-pulse`} fill="currentColor" />
                 </h3>
                 
                 <div className="space-y-5">
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border-3 border-pink-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
+                  <div className={`${isDarkMode ? 'bg-gray-600' : 'bg-white'} rounded-2xl p-6 shadow-lg border-3 ${isDarkMode ? 'border-gray-500' : 'border-pink-100'} transform transition-all hover:scale-[1.02] hover:shadow-xl`}>
                     <div className="flex items-center gap-4">
                       <div className="text-4xl">📅</div>
                       <div className="flex-1">
-                        <div className="text-xs text-purple-500 uppercase tracking-wide font-bold">Date</div>
-                        <div className="font-bold text-purple-800 text-lg">{formatDate(dateData.date)}</div>
+                        <div className={`text-xs ${isDarkMode ? 'text-red-400' : 'text-purple-500'} uppercase tracking-wide font-bold`}>Date</div>
+                        <div className={`font-bold ${isDarkMode ? 'text-red-300' : 'text-purple-800'} text-lg`}>{formatDate(dateData.date)}</div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border-3 border-pink-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
+                  <div className={`${isDarkMode ? 'bg-gray-600' : 'bg-white'} rounded-2xl p-6 shadow-lg border-3 ${isDarkMode ? 'border-gray-500' : 'border-pink-100'} transform transition-all hover:scale-[1.02] hover:shadow-xl`}>
                     <div className="flex items-center gap-4">
                       <div className="text-4xl animate-none">🍽️</div>
                       <div className="flex-1">
-                        <div className="text-xs text-purple-500 uppercase tracking-wide font-bold">Restaurant</div>
-                        <div className="font-bold text-purple-800 text-lg">{dateData.restaurant}</div>
+                        <div className={`text-xs ${isDarkMode ? 'text-red-400' : 'text-purple-500'} uppercase tracking-wide font-bold`}>Restaurant</div>
+                        <div className={`font-bold ${isDarkMode ? 'text-red-300' : 'text-purple-800'} text-lg`}>{dateData.restaurant}</div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border-3 border-pink-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
+                  <div className={`${isDarkMode ? 'bg-gray-600' : 'bg-white'} rounded-2xl p-6 shadow-lg border-3 ${isDarkMode ? 'border-gray-500' : 'border-pink-100'} transform transition-all hover:scale-[1.02] hover:shadow-xl`}>
                     <div className="flex items-center gap-4">
                       <div className="text-4xl animate-none">🎉</div>
                       <div className="flex-1">
-                        <div className="text-xs text-purple-500 uppercase tracking-wide font-bold">Activity</div>
-                        <div className="font-bold text-purple-800 text-lg">{dateData.activity}</div>
+                        <div className={`text-xs ${isDarkMode ? 'text-red-400' : 'text-purple-500'} uppercase tracking-wide font-bold`}>Activity</div>
+                        <div className={`font-bold ${isDarkMode ? 'text-red-300' : 'text-purple-800'} text-lg`}>{dateData.activity}</div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border-3 border-pink-100 transform transition-all hover:scale-[1.02] hover:shadow-xl">
+                  <div className={`${isDarkMode ? 'bg-gray-600' : 'bg-white'} rounded-2xl p-6 shadow-lg border-3 ${isDarkMode ? 'border-gray-500' : 'border-pink-100'} transform transition-all hover:scale-[1.02] hover:shadow-xl`}>
                     <div className="flex items-center gap-4">
                       <div className="text-4xl animate-pulse">✨</div>
                       <div className="flex-1">
-                        <div className="text-xs text-purple-500 uppercase tracking-wide font-bold">Excitement Level</div>
-                        <div className="font-bold text-purple-800 text-lg flex items-center gap-2">
+                        <div className={`text-xs ${isDarkMode ? 'text-red-400' : 'text-purple-500'} uppercase tracking-wide font-bold`}>Excitement Level</div>
+                        <div className={`font-bold ${isDarkMode ? 'text-red-300' : 'text-purple-800'} text-lg flex items-center gap-2`}>
                           {dateData.excitement}/6 {getExcitementEmoji(dateData.excitement)}
                         </div>
                       </div>
@@ -706,7 +717,7 @@ Bubba 🐱
                          justify-center gap-4 border-4 border-white
                          ${emailSending 
                            ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed opacity-75' 
-                           : 'bg-gradient-to-r from-pink-400 to-purple-500 text-white hover:scale-105 hover:shadow-pink-400/50 hover:shadow-2xl animate-pulse hover:animate-none'}`}
+                           : `bg-gradient-to-r ${isDarkMode ? 'from-red-500 to-red-600' : 'from-pink-400 to-purple-500'} text-white hover:scale-105 hover:shadow-red-400/50 hover:shadow-2xl animate-pulse hover:animate-none`}`}
               >
                 {emailSending ? (
                   <>
@@ -725,7 +736,7 @@ Bubba 🐱
 
               {emailError && (
                 <div className="mt-4 text-center">
-                  <div className="text-pink-600 font-semibold bg-pink-50 rounded-2xl p-4 border-2 border-pink-200">
+                  <div className={`${isDarkMode ? 'text-red-400 bg-gray-700 border-red-500' : 'text-pink-600 bg-pink-50 border-pink-200'} font-semibold rounded-2xl p-4 border-2`}>
                     {emailError} 😔
                   </div>
                 </div>
@@ -733,7 +744,7 @@ Bubba 🐱
 
               {showSuccess && (
                 <div className="mt-8 text-center">
-                  <div className="text-3xl font-bold text-pink-600 mb-3">
+                  <div className={`text-3xl font-bold ${isDarkMode ? 'text-red-400' : 'text-pink-600'} mb-3`}>
                     <span className="inline-block"></span> Let's BUBB go!!! <span className="inline-block">💕</span>
                   </div>
                 </div>
@@ -751,12 +762,12 @@ Bubba 🐱
   // MAIN RENDER
   // ============================================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-pink-100 relative overflow-hidden">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-pink-100 via-purple-50 to-pink-100'} relative overflow-hidden`}>
       {/* Cute background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-32 h-32 bg-pink-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse" />
-        <div className="absolute bottom-20 left-20 w-40 h-40 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse animation-delay-2000" />
-        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-pink-400 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-pulse animation-delay-4000" />
+        <div className={`absolute top-20 right-20 w-32 h-32 ${isDarkMode ? 'bg-red-400/20' : 'bg-pink-300'} rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse`} />
+        <div className={`absolute bottom-20 left-20 w-40 h-40 ${isDarkMode ? 'bg-red-500/20' : 'bg-purple-300'} rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse animation-delay-2000`} />
+        <div className={`absolute top-1/2 left-1/3 w-24 h-24 ${isDarkMode ? 'bg-red-300/20' : 'bg-pink-400'} rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-pulse animation-delay-4000`} />
       </div>
 
       {/* Confetti */}
@@ -765,7 +776,18 @@ Bubba 🐱
       {/* Main Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-5xl">
-          <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-12 border-4 border-pink-200">
+          <div className={`${isDarkMode ? 'bg-gray-800/95 border-red-400' : 'bg-white/90 border-pink-200'} backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-12 border-4`}>
+            {/* Dark Mode Toggle */}
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${isDarkMode ? 'from-red-500 to-red-600' : 'from-red-400 to-pink-500'} text-white rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-white`}
+              >
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                <span className="font-medium">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+            </div>
+
             {/* Content */}
             <div className="min-h-[500px]">
               {renderStepContent()}
@@ -776,9 +798,9 @@ Bubba 🐱
               <div className="flex justify-between items-center mt-12">
                 <button
                   onClick={handleBack}
-                  className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-3xl border-4 border-purple-200
+                  className={`flex items-center gap-3 px-8 py-4 bg-gradient-to-r ${isDarkMode ? 'from-gray-600 to-gray-700 text-red-300 border-gray-500' : 'from-purple-100 to-pink-100 text-purple-700 border-purple-200'} rounded-3xl border-4
                            font-bold transform transition-all duration-300 hover:scale-105 
-                           hover:bg-gradient-to-r hover:from-purple-200 hover:to-pink-200 hover:shadow-lg active:scale-95"
+                           hover:bg-gradient-to-r ${isDarkMode ? 'hover:from-gray-500 hover:to-gray-600' : 'hover:from-purple-200 hover:to-pink-200'} hover:shadow-lg active:scale-95`}
                 >
                   <ChevronLeft className="w-5 h-5" />
                   Back
@@ -790,8 +812,8 @@ Bubba 🐱
                   className={`flex items-center gap-3 px-8 py-4 rounded-3xl font-bold border-4 border-white
                             transform transition-all duration-300 active:scale-95
                             ${canProceedToNext() 
-                              ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white hover:scale-105 hover:shadow-xl hover:shadow-pink-300/50 animate-pulse hover:animate-none' 
-                              : 'bg-purple-200 text-purple-400 cursor-not-allowed opacity-50 border-purple-300'}`}
+                              ? `bg-gradient-to-r ${isDarkMode ? 'from-red-500 to-red-600' : 'from-pink-400 to-purple-500'} text-white hover:scale-105 hover:shadow-xl hover:shadow-red-300/50 animate-pulse hover:animate-none` 
+                              : `${isDarkMode ? 'bg-gray-600 text-gray-400 border-gray-500' : 'bg-purple-200 text-purple-400 border-purple-300'} cursor-not-allowed opacity-50`}`}
                 >
                   Next
                   <ChevronRight className="w-5 h-5" />
